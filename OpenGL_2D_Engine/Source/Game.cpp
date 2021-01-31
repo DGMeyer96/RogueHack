@@ -11,8 +11,6 @@
 #include "Engine/Particle_Generator.h"
 #include "Engine/Post_Processor.h"
 #include "Engine/Text_Renderer.h"
-
-
 // Audio Engine
 #include <irrklang/irrKlang.h>
 using namespace irrklang;
@@ -21,7 +19,6 @@ float ShakeTime = 0.0f;
 
 // Game-related State data
 SpriteRenderer*     Renderer;
-//GameObject*         Player;
 ParticleGenerator*  Particles;
 PostProcessor*      Effects;
 ISoundEngine*       SoundEngine = createIrrKlangDevice();
@@ -29,6 +26,8 @@ TextRenderer*       Text;
 
 // Player
 Player* Player_Object;
+
+void DrawOnScreenMessage(std::string message) { Text->RenderText(message, -400.0f, -300.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f)); }
 
 Game::Game(unsigned int width, unsigned int height) 
     : State(GAME_MENU), Keys(), KeysProcessed(), Width(width), Height(height), Level(0)
@@ -94,11 +93,12 @@ void Game::Init()
 
 void Game::Update(float deltaTime)
 {
+    //Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+
     // check for collisions
     this->DoCollisions();
     // update particles
     //Particles->Update(deltaTime, *Ball, 1, glm::vec2(Ball->Radius / 2.0f));
-    
 }
 
 void Game::ProcessInput(float deltaTime)
@@ -139,7 +139,7 @@ void Game::ProcessInput(float deltaTime)
                 || this->Keys[GLFW_KEY_UP] && !this->KeysProcessed[GLFW_KEY_UP])
             {
                 std::cout << "UP" << std::endl;
-                Player_Object->Position += glm::vec2(0.0f, -1.0f);
+                Player_Object->Position += glm::vec2(0.0f, 1.0f);
 
                 this->KeysProcessed[GLFW_KEY_W] = true;
                 this->KeysProcessed[GLFW_KEY_UP] = true;
@@ -149,7 +149,7 @@ void Game::ProcessInput(float deltaTime)
                 || this->Keys[GLFW_KEY_DOWN] && !this->KeysProcessed[GLFW_KEY_DOWN])
             {
                 std::cout << "DOWN" << std::endl;
-                Player_Object->Position += glm::vec2(0.0f, 1.0f);
+                Player_Object->Position += glm::vec2(0.0f, -1.0f);
 
                 this->KeysProcessed[GLFW_KEY_S] = true;
                 this->KeysProcessed[GLFW_KEY_DOWN] = true;
@@ -189,15 +189,19 @@ void Game::ProcessInput(float deltaTime)
 
 void Game::Render()
 {
-    
     if (this->State == GAME_ACTIVE || this->State == GAME_MENU)
     {
         //Effects->BeginRender();
 
+        // Hard Camera Movement
+        //Renderer->UpdateCameraPosition(glm::vec2(Player_Object->Position.x, -Player_Object->Position.y));
+        // Smooth Lerp Camera
+        Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+
         // draw background
         Renderer->DrawSprite(ResourceManager::GetTexture("background"),
             glm::vec2(0.0f, 0.0f), glm::vec2(48.0f, 27.0f), 0.0f);
-
+        
         Player_Object->Draw(*Renderer);
         
         // Testing drawing sprite sheet
@@ -245,6 +249,7 @@ void Game::Render()
         );
     }
     
+    DrawOnScreenMessage("Debug Message Test");
 }
 
 void Game::ResetLevel()

@@ -17,6 +17,7 @@ SpriteRenderer::SpriteRenderer(Shader shader, unsigned int screen_width, unsigne
     this->World_Unit = world_unit;
     this->World_Origin = glm::vec2(Screen_Width / 2, Screen_Height / 2);
     this->InitRenderData();
+    Camera_Position = glm::vec2(0.0f, 0.0f);
 }
 
 SpriteRenderer::~SpriteRenderer()
@@ -26,10 +27,11 @@ SpriteRenderer::~SpriteRenderer()
 
 void SpriteRenderer::DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
 {
+    position.y *= -1.0f;    // +Y = UP and -Y = DOWN
     // prepare transformations
     this->shader.Use();
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(World_Origin + (position * World_Unit), 0.0f));   // Make (0,0) center of the screen
+    model = glm::translate(model, glm::vec3(World_Origin + ((position - Camera_Position) * World_Unit), 0.0f));   // Make (0,0) center of the screen
 
     // Note: Order is from Left to Right so Transform order of operations is in reverse order
     // This makes the sprite's origin at the center instead of the top-left
@@ -50,6 +52,12 @@ void SpriteRenderer::DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2
     //glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); //More efficient, requires only 4 data sets
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1); //Instanced draw call
     glBindVertexArray(0);
+}
+
+void SpriteRenderer::UpdateCameraPosition(glm::vec2 cameraPos)
+{
+    //cameraPos.y *= -1.0f;
+    Camera_Position = cameraPos;
 }
 
 void SpriteRenderer::InitRenderData()

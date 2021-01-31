@@ -10,9 +10,6 @@ public:
 	Player(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec3 color);
 	~Player();
 
-	// Implement super function
-	//void Draw(SpriteRenderer& renderer) { GameObject::Draw(renderer); }
-
 	bool Attack();
 	bool TakeDamage(unsigned int damage);
 	bool IsDead();

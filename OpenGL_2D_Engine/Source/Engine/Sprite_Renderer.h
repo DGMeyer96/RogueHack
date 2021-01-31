@@ -14,6 +14,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Game_Math.h"
+
 #include "texture.h"
 #include "shader.h"
 
@@ -26,12 +28,16 @@ public:
     void DrawSprite(Texture2D texture, glm::vec2 position,
         glm::vec2 size = glm::vec2(1.0f, 1.0f), float rotate = 0.0f,
         glm::vec3 color = glm::vec3(1.0f));
+    void UpdateCameraPosition(glm::vec2 cameraPos);
+    glm::vec2 GetCameraPosition() { return Camera_Position; }
+
 private:
     Shader       shader;
     unsigned int quadVAO;
     unsigned int Screen_Width, Screen_Height;
     float World_Unit;
     glm::vec2 World_Origin;
+    glm::vec2 Camera_Position;
 
     void InitRenderData();
 };
