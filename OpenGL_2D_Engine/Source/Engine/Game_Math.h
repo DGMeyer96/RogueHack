@@ -8,6 +8,9 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+// LibNosie
+#include <noise/noise.h>
+#include <noise/noisegen.h>
 
 // Directions for collision resolution
 enum Direction {
