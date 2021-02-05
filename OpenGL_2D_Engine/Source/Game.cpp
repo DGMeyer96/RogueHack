@@ -195,46 +195,13 @@ void Game::ProcessInput(float deltaTime)
 
 void Game::Render()
 {
+    // draw background
+    Renderer->DrawSprite(ResourceManager::GetTexture("background"),
+        glm::vec2(0.0f, 0.0f), glm::vec2(48.0f, 27.0f), 0.0f);
+
     if (this->State == GAME_ACTIVE || this->State == GAME_MENU)
     {
         //Effects->BeginRender();
-
-        // Hard Camera Movement
-        //Renderer->UpdateCameraPosition(glm::vec2(Player_Object->Position.x, -Player_Object->Position.y));
-        //TRenderer->UpdateCameraPosition(glm::vec2(Player_Object->Position.x, -Player_Object->Position.y));
-        // Smooth Lerp Camera
-        TRenderer->UpdateCameraPosition(GameMath::Lerp(TRenderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
-        Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
-
-        glm::vec2 scale(1.0f, 1.0f);
-        glm::vec2 position(0.0f, 0.0f);
-        float rotation = 0.0f;
-        glm::vec3 color(1.0f, 1.0f, 1.0f);
-        
-        // draw background
-        Renderer->DrawSprite(ResourceManager::GetTexture("background"),
-            glm::vec2(0.0f, 0.0f), glm::vec2(48.0f, 27.0f), 0.0f);
-
-        // Testing individual sprite
-        position = glm::vec2(-1.0f, 0.0f);
-        Renderer->DrawSprite(ResourceManager::GetTexture("enemy"), position, scale, rotation, color);
-        position = glm::vec2(1.0f, 0.0f);
-        Renderer->DrawSprite(ResourceManager::GetTexture("chest"), position, scale, rotation, color);
-        position = glm::vec2(0.0f, 1.0f);
-        Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
-        position = glm::vec2(0.0f, -1.0f);
-        Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
-        
-        
-        // Testing Tilemap rendering
-        position = glm::vec2(0.0f, 3.0f);
-        TRenderer->DrawSprite(glm::vec2(1.0f, 1.0f), position, scale, rotation, color);
-
-        // Draw the player last so they are on top
-        Player_Object->Draw(*Renderer);
-
-        // draw UI
-        Text->RenderText("ROGUE HACK!", Width * -0.08f, Height * 0.45f, 1.0f);
     }
     if (State == GAME_MENU)
     {
@@ -243,7 +210,18 @@ void Game::Render()
     }
     else if (State == GAME_ACTIVE)
     {
-        
+        // Hard Camera Movement
+        //Renderer->UpdateCameraPosition(glm::vec2(Player_Object->Position.x, -Player_Object->Position.y));
+        //TRenderer->UpdateCameraPosition(glm::vec2(Player_Object->Position.x, -Player_Object->Position.y));
+        // Smooth Lerp Camera
+        TRenderer->UpdateCameraPosition(GameMath::Lerp(TRenderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+        Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+
+        DrawStatic();
+        DrawItems();
+        DrawDynamic();
+        DrawPlayer();
+        DrawUI();
     }
     else if (State == GAME_WIN)
     {
@@ -266,6 +244,63 @@ void Game::ResetLevel()
 void Game::ResetPlayer()
 {
 
+}
+
+void Game::DrawStatic()
+{
+    glm::vec2 scale(1.0f, 1.0f);
+    glm::vec2 position(0.0f, 0.0f);
+    float rotation = 0.0f;
+    glm::vec3 color(1.0f, 1.0f, 1.0f);
+
+    position = glm::vec2(0.0f, 1.0f);
+    Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
+    position = glm::vec2(0.0f, -1.0f);
+    Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
+}
+
+void Game::DrawItems()
+{
+    glm::vec2 scale(1.0f, 1.0f);
+    glm::vec2 position(0.0f, 0.0f);
+    float rotation = 0.0f;
+    glm::vec3 color(1.0f, 1.0f, 1.0f);
+
+    position = glm::vec2(1.0f, 0.0f);
+    Renderer->DrawSprite(ResourceManager::GetTexture("chest"), position, scale, rotation, color);
+}
+
+void Game::DrawDynamic()
+{
+    glm::vec2 scale(1.0f, 1.0f);
+    glm::vec2 position(0.0f, 0.0f);
+    float rotation = 0.0f;
+    glm::vec3 color(1.0f, 1.0f, 1.0f);
+
+    // Testing individual sprite
+    position = glm::vec2(-1.0f, 0.0f);
+    Renderer->DrawSprite(ResourceManager::GetTexture("enemy"), position, scale, rotation, color);
+    
+    // Testing Tilemap rendering
+    position = glm::vec2(0.0f, 3.0f);
+    TRenderer->DrawSprite(glm::vec2(1.0f, 1.0f), position, scale, rotation, color);
+}
+
+void Game::DrawPlayer()
+{
+    glm::vec2 scale(1.0f, 1.0f);
+    glm::vec2 position(0.0f, 0.0f);
+    float rotation = 0.0f;
+    glm::vec3 color(1.0f, 1.0f, 1.0f);
+
+    // Draw the player last so they are on top
+    Player_Object->Draw(*Renderer);
+}
+
+void Game::DrawUI()
+{
+    // draw UI
+    Text->RenderText("ROGUE HACK!", Width * -0.08f, Height * 0.45f, 1.0f);
 }
 
 void Game::DoCollisions()

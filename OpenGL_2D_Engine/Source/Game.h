@@ -72,6 +72,12 @@ private:
     const std::string Engine_Shader_Path = "./Shaders/Engine/";
     const std::string Shader_Path = "./Shaders/";
     const std::string Texture_Path = "./Assets/Textures/";
+
+    void DrawStatic();
+    void DrawItems();
+    void DrawDynamic();
+    void DrawPlayer();
+    void DrawUI();
 };
 
 #endif
