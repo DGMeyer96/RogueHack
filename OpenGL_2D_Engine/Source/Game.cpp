@@ -7,6 +7,7 @@
 // Engine Includes
 #include "Engine/Resource_Manager.h"
 #include "Engine/Sprite_Renderer.h"
+#include "Engine/Tilemap_Renderer.h"
 #include "Engine/Game_Object.h"
 #include "Engine/Particle_Generator.h"
 #include "Engine/Post_Processor.h"
@@ -19,6 +20,7 @@ float ShakeTime = 0.0f;
 
 // Game-related State data
 SpriteRenderer*     Renderer;
+TilemapRenderer*    TRenderer;
 ParticleGenerator*  Particles;
 PostProcessor*      Effects;
 ISoundEngine*       SoundEngine = createIrrKlangDevice();
@@ -49,6 +51,7 @@ void Game::Init()
 {
     // load shaders
     ResourceManager::LoadShader("./Shaders/Engine/Sprite.vert", "./Shaders/Engine/Sprite.frag", nullptr, "sprite");
+    ResourceManager::LoadShader("./Shaders/Engine/Tile.vert", "./Shaders/Engine/Tile.frag", nullptr, "tile");
     ResourceManager::LoadShader("./Shaders/Engine/Particle.vert", "./Shaders/Engine/Particle.frag", nullptr, "particle");
     ResourceManager::LoadShader("./Shaders/Engine/Post_Processing.vert", "./Shaders/Engine/Post_Processing.frag", nullptr, "postprocessing");
     
@@ -59,6 +62,8 @@ void Game::Init()
     // configure shaders
     ResourceManager::GetShader("sprite").Use().SetInteger("image", 0);
     ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
+    ResourceManager::GetShader("tile").Use().SetInteger("image", 0);
+    ResourceManager::GetShader("tile").SetMatrix4("projection", projection);
     ResourceManager::GetShader("particle").Use().SetInteger("sprite", 0);
     ResourceManager::GetShader("particle").SetMatrix4("projection", projection);
 
@@ -78,7 +83,7 @@ void Game::Init()
     
     // load textures
     ResourceManager::LoadTexture("./Assets/Textures/background.jpg", false, "background");
-    ResourceManager::LoadTexture("./Assets/Textures/SpriteSheet/1Bit_SpriteSheet.png", false, "spriteSheet");
+    ResourceManager::LoadTexture("./Assets/Textures/SpriteSheet/1Bit_SpriteSheet.png", true, "spriteSheet");
     ResourceManager::LoadTexture("./Assets/Textures/floppydisk.png", true, "test");
     ResourceManager::LoadTexture("./Assets/Textures/hero.gif", true, "hero");
     ResourceManager::LoadTexture("./Assets/Textures/enemy.gif", true, "enemy");
@@ -89,6 +94,7 @@ void Game::Init()
     //ResourceManager::LoadTexture("particle.png", true, "particle");
 
     Player_Object = new Player(ResourceManager::GetTexture("hero"));
+    TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 }
 
 void Game::Update(float deltaTime)
@@ -195,26 +201,21 @@ void Game::Render()
 
         // Hard Camera Movement
         //Renderer->UpdateCameraPosition(glm::vec2(Player_Object->Position.x, -Player_Object->Position.y));
+        //TRenderer->UpdateCameraPosition(glm::vec2(Player_Object->Position.x, -Player_Object->Position.y));
         // Smooth Lerp Camera
+        TRenderer->UpdateCameraPosition(GameMath::Lerp(TRenderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
         Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
 
-        // draw background
-        Renderer->DrawSprite(ResourceManager::GetTexture("background"),
-            glm::vec2(0.0f, 0.0f), glm::vec2(48.0f, 27.0f), 0.0f);
-        
-        Player_Object->Draw(*Renderer);
-        
-        // Testing drawing sprite sheet
-        //Renderer->DrawSprite(ResourceManager::GetTexture("spriteSheet"),
-        //    glm::vec2(0.0f, 0.0f));
-
-        // Testing individual sprite
         glm::vec2 scale(1.0f, 1.0f);
-        //glm::vec2 position((Width / 2), (Height / 2));
         glm::vec2 position(0.0f, 0.0f);
         float rotation = 0.0f;
         glm::vec3 color(1.0f, 1.0f, 1.0f);
-        //Renderer->DrawSprite(ResourceManager::GetTexture("hero"), position, scale, rotation, color);    // Center
+        
+        // draw background
+        Renderer->DrawSprite(ResourceManager::GetTexture("background"),
+            glm::vec2(0.0f, 0.0f), glm::vec2(48.0f, 27.0f), 0.0f);
+
+        // Testing individual sprite
         position = glm::vec2(-1.0f, 0.0f);
         Renderer->DrawSprite(ResourceManager::GetTexture("enemy"), position, scale, rotation, color);
         position = glm::vec2(1.0f, 0.0f);
@@ -223,11 +224,16 @@ void Game::Render()
         Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
         position = glm::vec2(0.0f, -1.0f);
         Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
- 
+        
+        
+        // Testing Tilemap rendering
+        position = glm::vec2(0.0f, 3.0f);
+        TRenderer->DrawSprite(glm::vec2(1.0f, 1.0f), position, scale, rotation, color);
+
+        // Draw the player last so they are on top
+        Player_Object->Draw(*Renderer);
 
         // draw UI
-        //std::stringstream ss; 
-        //ss << this->Lives;
         Text->RenderText("ROGUE HACK!", Width * -0.08f, Height * 0.45f, 1.0f);
     }
     if (State == GAME_MENU)

@@ -1,35 +1,34 @@
 /*******************************************************************
-** This code is part of Breakout.
 **
-** Breakout is free software: you can redistribute it and/or modify
-** it under the terms of the CC BY 4.0 license as published by
-** Creative Commons, either version 4 of the License, or (at your
-** option) any later version.
 ******************************************************************/
 
-#include "Sprite_Renderer.h"
+#include "Tilemap_Renderer.h"
 
-SpriteRenderer::SpriteRenderer(Shader shader, unsigned int screen_width, unsigned int screen_height, float world_unit)
+TilemapRenderer::TilemapRenderer(Shader shader, Texture2D texture, glm::vec2 cellSize, unsigned int screen_width, unsigned int screen_height, float world_unit)
 {
-    this->shader = shader;
-    this->Screen_Width = screen_width;
-    this->Screen_Height = screen_height;
-    this->World_Unit = world_unit;
-    this->World_Origin = glm::vec2(Screen_Width / 2, Screen_Height / 2);
-    this->InitRenderData();
+    Tile_Shader = shader;
+    Tilemap = texture;
+    CellWidth = cellSize.x;
+    CellHeight = cellSize.y;
+    Screen_Width = screen_width;
+    Screen_Height = screen_height;
+    World_Unit = world_unit;
+    World_Origin = glm::vec2(Screen_Width / 2, Screen_Height / 2);
+    InitRenderData();
     Camera_Position = glm::vec2(0.0f, 0.0f);
 }
 
-SpriteRenderer::~SpriteRenderer()
+TilemapRenderer::~TilemapRenderer()
 {
     glDeleteVertexArrays(1, &this->quadVAO);
 }
 
-void SpriteRenderer::DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
+void TilemapRenderer::DrawSprite(glm::vec2 cellPos, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
 {
     position.y *= -1.0f;    // +Y = UP and -Y = DOWN
     // prepare transformations
-    this->shader.Use();
+    this->Tile_Shader.Use();
+
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(World_Origin + ((position - Camera_Position) * World_Unit), 0.0f));   // Make (0,0) center of the screen
 
@@ -41,52 +40,30 @@ void SpriteRenderer::DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2
 
     model = glm::scale(model, glm::vec3(size * World_Unit, 1.0f));   // (1,1) scale is now a fixed world scale, regardless of resolution / aspect
 
-    this->shader.SetMatrix4("model", model);
-    this->shader.SetVector3f("spriteColor", color);
+    // Make sure to scale down the coordinate position by the map and cell dimensions
+    this->Tile_Shader.SetVector2f("texCoordOffset", glm::vec2(cellPos.x / (Tilemap.Width / CellWidth), cellPos.y / (Tilemap.Height / CellHeight)));
+    this->Tile_Shader.SetMatrix4("model", model);
+    this->Tile_Shader.SetVector3f("spriteColor", color);
 
     glActiveTexture(GL_TEXTURE0);
-    texture.Bind();
+    Tilemap.Bind();
 
     glBindVertexArray(this->quadVAO);
-    //glDrawArrays(GL_TRIANGLES, 0, 6); //Less efficient, requires 6 data sets
-    //glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); //More efficient, requires only 4 data sets
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1); //Instanced draw call
     glBindVertexArray(0);
 }
 
-void SpriteRenderer::UpdateCameraPosition(glm::vec2 cameraPos)
-{
-    //cameraPos.y *= -1.0f;
-    Camera_Position = cameraPos;
-}
-
-void SpriteRenderer::InitRenderData()
+void TilemapRenderer::InitRenderData()
 {
     // configure VAO/VBO
     unsigned int VBO;
     float vertices[] = {
         // pos          // tex
         // Origin @ Center
-        0.5f, -0.5f,    1.0f, 0.0f,
-        0.5f, 0.5f,     1.0f, 1.0f,
+        0.5f, -0.5f,    (CellWidth / Tilemap.Width), 0.0f,
+        0.5f, 0.5f,     (CellWidth / Tilemap.Width), (CellHeight / Tilemap.Height),
         -0.5f, -0.5f,   0.0f, 0.0f,
-        -0.5f, 0.5f,    0.0f, 1.0f
-
-        /* Origin @ Top-Left
-        1.0f, 0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 1.0f
-        */
-
-        /* For GL_TRIANGLES
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f
-        */
+        -0.5f, 0.5f,    0.0f, (CellHeight / Tilemap.Height)
     };
 
     glGenVertexArrays(1, &this->quadVAO);

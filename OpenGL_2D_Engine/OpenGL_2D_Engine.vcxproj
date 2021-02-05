@@ -156,6 +156,7 @@
     <ClCompile Include="Source\Engine\Sprite_Renderer.cpp" />
     <ClCompile Include="Source\Engine\Texture.cpp" />
     <ClCompile Include="Source\Engine\Text_Renderer.cpp" />
+    <ClCompile Include="Source\Engine\Tilemap_Renderer.cpp" />
     <ClCompile Include="Source\Game.cpp" />
     <ClCompile Include="Source\Game_Level.cpp" />
     <ClCompile Include="Source\Item.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="Source\Engine\Sprite_Renderer.h" />
     <ClInclude Include="Source\Engine\Texture.h" />
     <ClInclude Include="Source\Engine\Text_Renderer.h" />
+    <ClInclude Include="Source\Engine\Tilemap_Renderer.h" />
     <ClInclude Include="Source\Game.h" />
     <ClInclude Include="Source\Game_Level.h" />
     <ClInclude Include="Source\Item.h" />
@@ -189,6 +191,8 @@
     <None Include="Shaders\Engine\Sprite.vert" />
     <None Include="Shaders\Engine\Text.frag" />
     <None Include="Shaders\Engine\Text.vert" />
+    <None Include="Shaders\Engine\Tile.frag" />
+    <None Include="Shaders\Engine\Tile.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
