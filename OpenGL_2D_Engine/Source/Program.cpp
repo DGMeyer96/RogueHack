@@ -26,6 +26,8 @@ const unsigned int SCREEN_WIDTH = 1280;
 // The height of the screen
 const unsigned int SCREEN_HEIGHT = 720;
 
+float DEFAULT_MONITOR_REFRESH = 62.0f;
+
 Game RogueHack(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 int main(int argc, char* argv[])
@@ -37,7 +39,31 @@ int main(int argc, char* argv[])
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-    glfwWindowHint(GLFW_RESIZABLE, false);
+
+    // Configure the window
+    glfwWindowHint(GLFW_RESIZABLE, true);
+    glfwWindowHint(GLFW_DECORATED, true);
+    glfwWindowHint(GLFW_FOCUSED, true);
+    glfwWindowHint(GLFW_AUTO_ICONIFY, true);
+    
+    glfwWindowHint(GLFW_DOUBLEBUFFER, true);
+
+    // Borderless Window
+    /*
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+    glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+    glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+    glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+    glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+    glfwWindowHint(GLFW_MAXIMIZED, true);
+    //glfwWindowHint(GLFW_SCALE_TO_MONITOR, true);
+
+    DEFAULT_MONITOR_REFRESH = mode->refreshRate;
+    
+    //GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "Rogue Hack", NULL, NULL);
+    */
 
     GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Rogue Hack", nullptr, nullptr);
     glfwMakeContextCurrent(window);
@@ -52,6 +78,9 @@ int main(int argc, char* argv[])
 
     glfwSetKeyCallback(window, key_callback);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    //  V-Sync, Not set = driver default, 1 = Enable, 0 = disable, keep on to prevent 1000+ fps
+    glfwSwapInterval(1);
 
     // OpenGL configuration
     // --------------------
@@ -124,4 +153,5 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
+    glfwSetWindowAspectRatio(window, 16, 9);    //Forces 16:9 aspect ratio when resizing
 }
