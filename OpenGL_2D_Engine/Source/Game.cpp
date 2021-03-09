@@ -19,6 +19,10 @@ using namespace irrklang;
 #define STB_PERLIN_IMPLEMENTATION
 #include "stb_perlin.h"
 
+// C++ Includes
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
+
 float ShakeTime = 0.0f;
 
 // Game-related State data
@@ -31,6 +35,10 @@ TextRenderer*       Text;
 
 // Player
 Player* Player_Object;
+
+static const int MAP_SIZE = 10;
+
+std::vector<std::vector<float>> PerlinNoiseMap(MAP_SIZE, std::vector<float>(MAP_SIZE));
 
 void DrawOnScreenMessage(std::string message) { Text->RenderText(message, -400.0f, -300.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f)); }
 
@@ -99,20 +107,23 @@ void Game::Init()
     Player_Object = new Player(ResourceManager::GetTexture("hero"));
     TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 
+    // Initalize random seed
+    srand(time(NULL));
+
     // Test implementation for perlin noise 
     float noiseVal;
-    for (float x = 0.0f; x < 1.0f; x += 0.1f)
+    for (int x = 0; x < MAP_SIZE; ++x)
     {
-        for (float y = 0.0f; y < 1.0f; y += 0.1f)
+        for (int y = 0; y < MAP_SIZE; ++y)
         {
-            //noiseVal = pNoise.GetValue(x, y, 0);
-            // Using '0' to specify "Don't care" for wrap 
-            noiseVal = stb_perlin_noise3(x, y, 0.0f, 0, 0, 0);
-            if (noiseVal < 0.0f)
-            {
-                noiseVal *= -1.0f;
-            }
 
+            // Using '0' to specify "Don't care" for wrap 
+            noiseVal = stb_perlin_noise3(((float) rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)), 0, 0, 0);
+            // Don't want to have a negative value
+            if (noiseVal < 0.0f)
+                noiseVal *= -1.0f;
+
+            PerlinNoiseMap[x][y] = noiseVal;
             std::cout << noiseVal << std::endl;
         }
     }
@@ -220,6 +231,8 @@ void Game::Render()
     Renderer->DrawSprite(ResourceManager::GetTexture("background"),
         glm::vec2(0.0f, 0.0f), glm::vec2(48.0f, 27.0f), 0.0f);
 
+    DrawStatic();
+
     if (this->State == GAME_ACTIVE || this->State == GAME_MENU)
     {
         //Effects->BeginRender();
@@ -238,7 +251,7 @@ void Game::Render()
         TRenderer->UpdateCameraPosition(GameMath::Lerp(TRenderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
         Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
 
-        DrawStatic();
+        //DrawStatic();
         DrawItems();
         DrawDynamic();
         DrawPlayer();
@@ -279,22 +292,30 @@ void Game::DrawStatic()
     position = glm::vec2(0.0f, -1.0f);
     Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
 
-    //Perlin pNoise = Perlin();
-    
-    /*
-    float noiseVal;
-    for (int x = -25; x < 25; ++x)
+    // Draw our generated perlin noise map
+    for (int x = 0; x < PerlinNoiseMap.size(); ++x)
     {
-        for (int y = -25; y < 25; ++y)
+        for (int y = 0; y < PerlinNoiseMap[0].size(); ++y)
         {
-            //noiseVal = pNoise.GetValue(x, y, 0);
-            // Using '0' to specify "Don't care" for wrap 
-            noiseVal = stb_perlin_noise3(x, y, 1.0f, 0, 0, 0);
-            
-            std::cout << noiseVal << std::endl;
+            position = glm::vec2(x - (MAP_SIZE / 2), y - (MAP_SIZE / 2));
+            //color = glm::vec3(PerlinNoiseMap[x][y]);
+
+            if (PerlinNoiseMap[x][y] > 0.55f)
+            {
+                color = glm::vec3(0.7f, 0.7f, 0.7f);
+            }
+            else if (PerlinNoiseMap[x][y] > 0.2f)
+            {
+                color = glm::vec3(0.0f, 1.0f, 0.0f);
+            }
+            else
+            {
+                color = glm::vec3(0.0f, 0.0f, 1.0f);
+            }
+
+            Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
         }
     }
-    */
 }
 
 void Game::DrawItems()
