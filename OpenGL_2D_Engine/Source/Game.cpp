@@ -15,6 +15,9 @@
 // Audio Engine
 #include <irrklang/irrKlang.h>
 using namespace irrklang;
+// STB Perlin Noise Generation
+#define STB_PERLIN_IMPLEMENTATION
+#include "stb_perlin.h"
 
 float ShakeTime = 0.0f;
 
@@ -95,6 +98,24 @@ void Game::Init()
 
     Player_Object = new Player(ResourceManager::GetTexture("hero"));
     TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
+
+    // Test implementation for perlin noise 
+    float noiseVal;
+    for (float x = 0.0f; x < 1.0f; x += 0.1f)
+    {
+        for (float y = 0.0f; y < 1.0f; y += 0.1f)
+        {
+            //noiseVal = pNoise.GetValue(x, y, 0);
+            // Using '0' to specify "Don't care" for wrap 
+            noiseVal = stb_perlin_noise3(x, y, 0.0f, 0, 0, 0);
+            if (noiseVal < 0.0f)
+            {
+                noiseVal *= -1.0f;
+            }
+
+            std::cout << noiseVal << std::endl;
+        }
+    }
 }
 
 void Game::Update(float deltaTime)
@@ -257,6 +278,23 @@ void Game::DrawStatic()
     Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
     position = glm::vec2(0.0f, -1.0f);
     Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
+
+    //Perlin pNoise = Perlin();
+    
+    /*
+    float noiseVal;
+    for (int x = -25; x < 25; ++x)
+    {
+        for (int y = -25; y < 25; ++y)
+        {
+            //noiseVal = pNoise.GetValue(x, y, 0);
+            // Using '0' to specify "Don't care" for wrap 
+            noiseVal = stb_perlin_noise3(x, y, 1.0f, 0, 0, 0);
+            
+            std::cout << noiseVal << std::endl;
+        }
+    }
+    */
 }
 
 void Game::DrawItems()
@@ -283,7 +321,7 @@ void Game::DrawDynamic()
     
     // Testing Tilemap rendering
     position = glm::vec2(0.0f, 3.0f);
-    TRenderer->DrawSprite(glm::vec2(1.0f, 1.0f), position, scale, rotation, color);
+    TRenderer->DrawSprite(glm::vec2(5.0f, 5.0f), position, scale, rotation, color);
 }
 
 void Game::DrawPlayer()
