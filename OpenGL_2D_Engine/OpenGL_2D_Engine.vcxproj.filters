@@ -75,6 +75,12 @@
     <ClInclude Include="Source\Engine\Tilemap_Renderer.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Overworld.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Batch_Renderer.h">
+      <Filter>Header Files\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -128,6 +134,12 @@
     <ClCompile Include="Source\Engine\Tilemap_Renderer.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Overworld.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Batch_Renderer.cpp">
+      <Filter>Source Files\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Engine\Basic.frag">
@@ -164,6 +176,12 @@
       <Filter>Shaders\Fragment Shaders</Filter>
     </None>
     <None Include="Shaders\Engine\Tile.vert">
+      <Filter>Shaders\Vertex Shaders</Filter>
+    </None>
+    <None Include="Shaders\Engine\Batch.frag">
+      <Filter>Shaders\Fragment Shaders</Filter>
+    </None>
+    <None Include="Shaders\Engine\Batch.vert">
       <Filter>Shaders\Vertex Shaders</Filter>
     </None>
   </ItemGroup>

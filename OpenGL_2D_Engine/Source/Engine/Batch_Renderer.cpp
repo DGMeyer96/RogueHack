@@ -1,15 +1,6 @@
-/*******************************************************************
-** This code is part of Breakout.
-**
-** Breakout is free software: you can redistribute it and/or modify
-** it under the terms of the CC BY 4.0 license as published by
-** Creative Commons, either version 4 of the License, or (at your
-** option) any later version.
-******************************************************************/
+#include "Batch_Renderer.h"
 
-#include "Sprite_Renderer.h"
-
-SpriteRenderer::SpriteRenderer(Shader shader, unsigned int screen_width, unsigned int screen_height, float world_unit)
+BatchRenderer::BatchRenderer(Shader shader, unsigned int screen_width, unsigned int screen_height, float world_unit)
 {
     this->shader = shader;
     this->Screen_Width = screen_width;
@@ -20,12 +11,15 @@ SpriteRenderer::SpriteRenderer(Shader shader, unsigned int screen_width, unsigne
     Camera_Position = glm::vec2(0.0f, 0.0f);
 }
 
-SpriteRenderer::~SpriteRenderer()
+BatchRenderer::~BatchRenderer()
 {
-    glDeleteVertexArrays(1, &this->quadVAO);
+    // optional: de-allocate all resources once they've outlived their purpose:
+    // ------------------------------------------------------------------------
+    glDeleteVertexArrays(1, &quadVAO);
+    glDeleteBuffers(1, &quadVBO);
 }
 
-void SpriteRenderer::DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
+void BatchRenderer::BatchDraw(Texture2D texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
 {
     position.y *= -1.0f;    // +Y = UP and -Y = DOWN
     // prepare transformations
@@ -47,22 +41,36 @@ void SpriteRenderer::DrawSprite(Texture2D texture, glm::vec2 position, glm::vec2
 
     glActiveTexture(GL_TEXTURE0);
     texture.Bind();
-
+    
+    // draw 100 instanced quads
     glBindVertexArray(this->quadVAO);
-    //glDrawArrays(GL_TRIANGLES, 0, 6); //Less efficient, requires 6 data sets
-    //glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); //More efficient, requires only 4 data sets
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1); //Instanced draw call
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1000000); // 100 triangles of 6 vertices each
     glBindVertexArray(0);
 }
 
-void SpriteRenderer::UpdateCameraPosition(glm::vec2 cameraPos)
+void BatchRenderer::InitRenderData()
 {
-    //cameraPos.y *= -1.0f;
-    Camera_Position = cameraPos;
-}
+    int index = 0;
+    float offset = 0.0f;
+    for (int y = -500; y < 500; ++y)
+    {
+        for (int x = -500; x < 500; ++x)
+        {
+            glm::vec2 translation;
+            translation.x = (float)x + offset;
+            translation.y = (float)y + offset;
+            translations[index++] = translation;
+        }
+    }
 
-void SpriteRenderer::InitRenderData()
-{
+    // store instance data in an array buffer
+    // --------------------------------------
+    unsigned int instanceVBO;
+    glGenBuffers(1, &instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 1000000, &translations[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     // configure VAO/VBO
     unsigned int VBO;
     float vertices[] = {
@@ -72,33 +80,22 @@ void SpriteRenderer::InitRenderData()
         0.5f, 0.5f,     1.0f, 1.0f,
         -0.5f, -0.5f,   0.0f, 0.0f,
         -0.5f, 0.5f,    0.0f, 1.0f
-
-        /* Origin @ Top-Left
-        1.0f, 0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 1.0f
-        */
-
-        /* For GL_TRIANGLES
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f
-        */
     };
 
     glGenVertexArrays(1, &this->quadVAO);
-    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &quadVBO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindVertexArray(this->quadVAO);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+    // also set instance data
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO); // this attribute comes from a different vertex buffer
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glVertexAttribDivisor(1, 1); // tell OpenGL this is an instanced vertex attribute.
 }

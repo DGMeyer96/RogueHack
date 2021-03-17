@@ -8,6 +8,7 @@
 #include "Engine/Resource_Manager.h"
 #include "Engine/Sprite_Renderer.h"
 #include "Engine/Tilemap_Renderer.h"
+#include "Engine/Batch_Renderer.h"
 #include "Engine/Game_Object.h"
 #include "Engine/Particle_Generator.h"
 #include "Engine/Post_Processor.h"
@@ -28,6 +29,7 @@ float ShakeTime = 0.0f;
 // Game-related State data
 SpriteRenderer*     Renderer;
 TilemapRenderer*    TRenderer;
+BatchRenderer*      BRenderer;
 ParticleGenerator*  Particles;
 PostProcessor*      Effects;
 ISoundEngine*       SoundEngine = createIrrKlangDevice();
@@ -63,6 +65,7 @@ void Game::Init()
     // load shaders
     ResourceManager::LoadShader("./Shaders/Engine/Sprite.vert", "./Shaders/Engine/Sprite.frag", nullptr, "sprite");
     ResourceManager::LoadShader("./Shaders/Engine/Tile.vert", "./Shaders/Engine/Tile.frag", nullptr, "tile");
+    ResourceManager::LoadShader("./Shaders/Engine/Batch.vert", "./Shaders/Engine/Batch.frag", nullptr, "batch");
     ResourceManager::LoadShader("./Shaders/Engine/Particle.vert", "./Shaders/Engine/Particle.frag", nullptr, "particle");
     ResourceManager::LoadShader("./Shaders/Engine/Post_Processing.vert", "./Shaders/Engine/Post_Processing.frag", nullptr, "postprocessing");
     
@@ -75,11 +78,14 @@ void Game::Init()
     ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
     ResourceManager::GetShader("tile").Use().SetInteger("image", 0);
     ResourceManager::GetShader("tile").SetMatrix4("projection", projection);
+    ResourceManager::GetShader("batch").Use().SetInteger("image", 0);
+    ResourceManager::GetShader("batch").SetMatrix4("projection", projection);
     ResourceManager::GetShader("particle").Use().SetInteger("sprite", 0);
     ResourceManager::GetShader("particle").SetMatrix4("projection", projection);
 
     // set render-specific controls
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"), Width, Height, WORLD_UNIT);
+    BRenderer = new BatchRenderer(ResourceManager::GetShader("batch"), Width, Height, WORLD_UNIT);
     //Particles = new ParticleGenerator(ResourceManager::GetShader("particle"), ResourceManager::GetTexture("particle"), 1000);
     //Effects = new PostProcessor(ResourceManager::GetShader("postprocessing"), Width, Height);
     
@@ -107,6 +113,7 @@ void Game::Init()
     Player_Object = new Player(ResourceManager::GetTexture("hero"));
     TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 
+    /*
     // Initalize random seed
     srand(time(NULL));
 
@@ -127,6 +134,7 @@ void Game::Init()
             std::cout << noiseVal << std::endl;
         }
     }
+    */
 }
 
 void Game::Update(float deltaTime)
@@ -247,9 +255,11 @@ void Game::Render()
         // Hard Camera Movement
         //Renderer->UpdateCameraPosition(glm::vec2(Player_Object->Position.x, -Player_Object->Position.y));
         //TRenderer->UpdateCameraPosition(glm::vec2(Player_Object->Position.x, -Player_Object->Position.y));
+
         // Smooth Lerp Camera
         TRenderer->UpdateCameraPosition(GameMath::Lerp(TRenderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
         Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+        BRenderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
 
         //DrawStatic();
         DrawItems();
@@ -292,6 +302,10 @@ void Game::DrawStatic()
     position = glm::vec2(0.0f, -1.0f);
     Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
 
+    position = glm::vec2(0.0f, 0.0f);
+    BRenderer->BatchDraw(ResourceManager::GetTexture("block"), position, scale, rotation, color);
+
+    /*
     // Draw our generated perlin noise map
     for (int x = 0; x < PerlinNoiseMap.size(); ++x)
     {
@@ -316,6 +330,7 @@ void Game::DrawStatic()
             Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
         }
     }
+    */
 }
 
 void Game::DrawItems()

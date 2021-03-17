@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="glad.c" />
     <ClCompile Include="Source\Enemy.cpp" />
+    <ClCompile Include="Source\Engine\Batch_Renderer.cpp" />
     <ClCompile Include="Source\Engine\Game_Math.cpp" />
     <ClCompile Include="Source\Engine\Game_Object.cpp" />
     <ClCompile Include="Source\Engine\Particle_Generator.cpp" />
@@ -160,11 +161,13 @@
     <ClCompile Include="Source\Game.cpp" />
     <ClCompile Include="Source\Game_Level.cpp" />
     <ClCompile Include="Source\Item.cpp" />
+    <ClCompile Include="Source\Overworld.cpp" />
     <ClCompile Include="Source\Player.cpp" />
     <ClCompile Include="Source\Program.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Enemy.h" />
+    <ClInclude Include="Source\Engine\Batch_Renderer.h" />
     <ClInclude Include="Source\Engine\Game_Math.h" />
     <ClInclude Include="Source\Engine\Game_Object.h" />
     <ClInclude Include="Source\Engine\Particle_Generator.h" />
@@ -178,11 +181,14 @@
     <ClInclude Include="Source\Game.h" />
     <ClInclude Include="Source\Game_Level.h" />
     <ClInclude Include="Source\Item.h" />
+    <ClInclude Include="Source\Overworld.h" />
     <ClInclude Include="Source\Player.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Engine\Basic.frag" />
     <None Include="Shaders\Engine\Basic.vert" />
+    <None Include="Shaders\Engine\Batch.frag" />
+    <None Include="Shaders\Engine\Batch.vert" />
     <None Include="Shaders\Engine\Particle.frag" />
     <None Include="Shaders\Engine\Particle.vert" />
     <None Include="Shaders\Engine\Post_Processing.frag" />
