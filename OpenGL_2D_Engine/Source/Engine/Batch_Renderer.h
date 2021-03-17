@@ -1,4 +1,20 @@
-
+/*
+*
+* New renderer type.  This will replace the standard Sprite Renderer and include all added functionality from
+* the Tilemap Renderer as well.  This new renderer will draw out in waves.  These waves include:
+* 
+* Static Game Objects (Do not move or change states at all)
+* Item Game Objects (Will only change when the player interacts with them)
+* Dynamic Game Objects (Will always change)
+* Player Game Object (Changes with the player input, will update camera as well)
+* UI Game Objects 
+* 
+* List of Game Objects will be held in a resizeable vector.  Every frame the Batch Renderer will receive a new
+* vector that contains the list of Game Objects to be rendered.  For Static this will only change when the levels
+* are changed, for Dynamic this will change every frame.  Each Game Object will contain information about its
+* Transform (pos, rot, scale), a sprite, a color, and any other information specific to that Game Object.
+* 
+*/
 
 #ifndef BATCH_RENDERER_H
 #define BATCH_RENDERER_H
@@ -33,7 +49,9 @@ private:
     glm::vec2 World_Origin;
     glm::vec2 Camera_Position;
 
-    glm::vec2 translations[1000000];
+    int BATCH_SIZE = 512; // small = 128 (256^2 = 65,536), medium = 256 (512^2 = 262,144), large = 512 (1024^2 = 1,048,576)
+
+    std::vector<glm::vec2> translations;    // Changed from Array to Vector so we can dynamically allocate space
 
 	void InitRenderData();
 };

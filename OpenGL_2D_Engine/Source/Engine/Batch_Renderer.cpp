@@ -9,6 +9,8 @@ BatchRenderer::BatchRenderer(Shader shader, unsigned int screen_width, unsigned 
     this->World_Origin = glm::vec2(Screen_Width / 2, Screen_Height / 2);
     this->InitRenderData();
     Camera_Position = glm::vec2(0.0f, 0.0f);
+
+    //translations = new glm::vec2[BATCH_SIZE];
 }
 
 BatchRenderer::~BatchRenderer()
@@ -17,6 +19,8 @@ BatchRenderer::~BatchRenderer()
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &quadVAO);
     glDeleteBuffers(1, &quadVBO);
+
+    translations = std::vector<glm::vec2>();
 }
 
 void BatchRenderer::BatchDraw(Texture2D texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
@@ -44,7 +48,7 @@ void BatchRenderer::BatchDraw(Texture2D texture, glm::vec2 position, glm::vec2 s
     
     // draw 100 instanced quads
     glBindVertexArray(this->quadVAO);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, 1000000); // 100 triangles of 6 vertices each
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, translations.size()); // 100 triangles of 6 vertices each
     glBindVertexArray(0);
 }
 
@@ -52,14 +56,15 @@ void BatchRenderer::InitRenderData()
 {
     int index = 0;
     float offset = 0.0f;
-    for (int y = -500; y < 500; ++y)
+    for (int y = -BATCH_SIZE; y < BATCH_SIZE; ++y)
     {
-        for (int x = -500; x < 500; ++x)
+        for (int x = -BATCH_SIZE; x < BATCH_SIZE; ++x)
         {
             glm::vec2 translation;
             translation.x = (float)x + offset;
             translation.y = (float)y + offset;
-            translations[index++] = translation;
+            //translations[index++] = translation;
+            translations.push_back(translation);
         }
     }
 
@@ -68,7 +73,8 @@ void BatchRenderer::InitRenderData()
     unsigned int instanceVBO;
     glGenBuffers(1, &instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 1000000, &translations[0], GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 1000000, &translations[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * translations.size(), &translations[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // configure VAO/VBO
