@@ -155,8 +155,6 @@ void Game::Init()
             glm::vec3 color(((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)));
 
             temp = GameObject(translation, 0.0f, glm::vec2(1.0f, 1.0f), ResourceManager::GetTexture("block"), color, glm::vec2(0.0f, 0.0f));
-
-            //translations[index++] = translation;
             GameMap.push_back(temp);
         }
     }

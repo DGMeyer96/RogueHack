@@ -54,14 +54,19 @@ private:
 
     int BATCH_SIZE = 512; // small = 128 (256^2 = 65,536), medium = 256 (512^2 = 262,144), large = 512 (1024^2 = 1,048,576)
 
+    std::vector<GameObject> Objects;
+
     std::vector<glm::vec2> translations;
     std::vector<float> rotations;
     std::vector<glm::vec2> scale;
+
+    std::vector<glm::mat4> modelMatrices;
 
     std::vector<glm::vec3> colors;
     std::vector<Texture2D> sprites;
 
 	void InitRenderData();
+    glm::mat4 UpdateModelMatrix(GameObject object);
 };
 
 
