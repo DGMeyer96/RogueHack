@@ -72,7 +72,7 @@ void BatchRenderer::BatchDraw(Texture2D texture, glm::vec2 position, glm::vec2 s
     model = glm::scale(model, glm::vec3(size * World_Unit, 1.0f));   // (1,1) scale is now a fixed world scale, regardless of resolution / aspect
 
     this->shader.SetMatrix4("model", model);
-    this->shader.SetVector3f("spriteColor", color);
+    //this->shader.SetVector3f("spriteColor", color);
 
     glActiveTexture(GL_TEXTURE0);
     texture.Bind();
@@ -103,11 +103,17 @@ void BatchRenderer::InitRenderData()
 
     // store instance data in an array buffer
     // --------------------------------------
-    unsigned int instanceVBO;
-    glGenBuffers(1, &instanceVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    unsigned int instanceVBO_Pos;
+    glGenBuffers(1, &instanceVBO_Pos);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO_Pos);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * translations.size(), &translations[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    unsigned int instanceVBO_Color;
+    glGenBuffers(1, &instanceVBO_Color);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO_Color);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * colors.size(), &colors[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 1);
 
     // configure VAO/VBO
     unsigned int VBO;
@@ -132,8 +138,14 @@ void BatchRenderer::InitRenderData()
 
     // also set instance data
     glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO); // this attribute comes from a different vertex buffer
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO_Pos); // this attribute comes from a different vertex buffer
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glVertexAttribDivisor(1, 1); // tell OpenGL this is an instanced vertex attribute.
+    glVertexAttribDivisor(1, 1); // tell OpenGL this is an instanced vertex attribute.  Update Attribute 1 every 1 instance
+
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO_Color);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, 1);
+    glVertexAttribDivisor(2, 1);    // Update Attribute 2 every 1 instance
 }

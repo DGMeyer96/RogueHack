@@ -115,10 +115,11 @@ void Game::Init()
     Player_Object = new Player(ResourceManager::GetTexture("hero"));
     TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 
-    /*
+    
     // Initalize random seed
     srand(time(NULL));
 
+    /*
     // Test implementation for perlin noise 
     float noiseVal;
     for (int x = 0; x < MAP_SIZE; ++x)
@@ -151,7 +152,9 @@ void Game::Init()
             translation.x = (float)x + offset;
             translation.y = (float)y + offset;
 
-            temp = GameObject(translation, 0.0f, glm::vec2(1.0f, 1.0f), ResourceManager::GetTexture("block"), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f));
+            glm::vec3 color(((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)));
+
+            temp = GameObject(translation, 0.0f, glm::vec2(1.0f, 1.0f), ResourceManager::GetTexture("block"), color, glm::vec2(0.0f, 0.0f));
 
             //translations[index++] = translation;
             GameMap.push_back(temp);
