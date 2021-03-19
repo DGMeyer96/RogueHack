@@ -8,9 +8,12 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+//#include <glm/gtc/noise.hpp>
 // LibNosie
 #include <noise/noise.h>
 #include <noise/noisegen.h>
+// STB Perlin Noise Generation
+#include "stb_perlin.h" // Much faster than glm::noise
 
 // Directions for collision resolution
 enum Direction {

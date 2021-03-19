@@ -16,13 +16,12 @@
 // Audio Engine
 #include <irrklang/irrKlang.h>
 using namespace irrklang;
-// STB Perlin Noise Generation
-#define STB_PERLIN_IMPLEMENTATION
-#include "stb_perlin.h"
+
 
 // C++ Includes
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
+#include <chrono>       /* C++11 time, more accurate for debugging */
 
 float ShakeTime = 0.0f;
 
@@ -38,7 +37,7 @@ TextRenderer*       Text;
 // Player
 Player* Player_Object;
 
-static const int MAP_SIZE = 10;
+static const int MAP_SIZE = 1000;
 
 std::vector<std::vector<float>> PerlinNoiseMap(MAP_SIZE, std::vector<float>(MAP_SIZE));
 
@@ -119,8 +118,12 @@ void Game::Init()
     // Initalize random seed
     srand(time(NULL));
 
-    /*
-    // Test implementation for perlin noise 
+    std::chrono::steady_clock::time_point start, end;
+    
+    // Test implementation for STB perlin noise 
+
+    std::cout << "STB Noise Test" << std::endl;
+    start = std::chrono::steady_clock::now();
     float noiseVal;
     for (int x = 0; x < MAP_SIZE; ++x)
     {
@@ -134,9 +137,33 @@ void Game::Init()
                 noiseVal *= -1.0f;
 
             PerlinNoiseMap[x][y] = noiseVal;
-            std::cout << noiseVal << std::endl;
+            //std::cout << noiseVal << std::endl;
         }
     }
+    end = std::chrono::steady_clock::now();
+    std::cout << "Elapsed Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    
+    /*
+    // Test implementation for GLM perlin noise 
+    std::cout << "GLM Noise Test" << std::endl;
+    start = std::chrono::steady_clock::now();
+    noiseVal;
+    for (int x = 0; x < MAP_SIZE; ++x)
+    {
+        for (int y = 0; y < MAP_SIZE; ++y)
+        {
+            // Using '0' to specify "Don't care" for wrap 
+            noiseVal = glm::perlin(glm::vec2((float)rand() / (RAND_MAX), (float)rand() / (RAND_MAX)));
+            // Don't want to have a negative value
+            if (noiseVal < 0.0f)
+                noiseVal *= -1.0f;
+
+            PerlinNoiseMap[x][y] = noiseVal;
+            //std::cout << noiseVal << std::endl;
+        }
+    }
+    end = std::chrono::steady_clock::now();
+    std::cout << "Elapsed Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
     */
 
     std::cout << "Generating GameMap" << std::endl;

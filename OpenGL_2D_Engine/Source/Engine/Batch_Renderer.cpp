@@ -82,7 +82,7 @@ void BatchRenderer::BatchDraw(Texture2D texture, glm::vec2 position, glm::vec2 s
 
     //shader.SetVector2f("texCoordOffset", glm::vec2(cellPos.x / (Tilemap.Width / CellWidth), cellPos.y / (Tilemap.Height / CellHeight)));
 
-    std::cout << "Batch Draw" << std::endl;
+    //std::cout << "Batch Draw" << std::endl;
     
     /*
     for (int i = 0; i < modelMatrices.size(); ++i)

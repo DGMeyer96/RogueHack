@@ -8,6 +8,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+//Noise
+#define STB_PERLIN_IMPLEMENTATION
+//#include "stb_perlin.h"
+
 //Fonts
 #include <ft2build.h>
 #include FT_FREETYPE_H
