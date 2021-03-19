@@ -7,7 +7,7 @@ BatchRenderer::BatchRenderer(Shader shader, unsigned int screen_width, unsigned 
     this->Screen_Height = screen_height;
     this->World_Unit = world_unit;
     this->World_Origin = glm::vec2(Screen_Width / 2, Screen_Height / 2);
-    this->InitRenderData();
+    //this->InitRenderData();
     Camera_Position = glm::vec2(0.0f, 0.0f);
 
     //translations = new glm::vec2[BATCH_SIZE];
@@ -20,7 +20,38 @@ BatchRenderer::~BatchRenderer()
     glDeleteVertexArrays(1, &quadVAO);
     glDeleteBuffers(1, &quadVBO);
 
+    // de-allocate memory
     translations = std::vector<glm::vec2>();
+    rotations = std::vector<float>();
+    scale = std::vector<glm::vec2>();
+    colors = std::vector<glm::vec3>();
+    sprites = std::vector<Texture2D>();
+}
+
+void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
+{
+    //Objects = objectsToDraw;
+
+    std::cout << "Setting Render Data" << std::endl;
+    
+    translations.resize(objectsToDraw.size());
+    rotations.resize(objectsToDraw.size());
+    scale.resize(objectsToDraw.size());
+    colors.resize(objectsToDraw.size());
+    sprites.resize(objectsToDraw.size());
+
+    for (int i = 0; i < objectsToDraw.size(); ++i)
+    {
+        translations[i] = objectsToDraw[i].Position;
+        rotations[i] = objectsToDraw[i].Rotation;
+        scale[i] = objectsToDraw[i].Scale;
+        colors[i] = objectsToDraw[i].Color;
+        sprites[i] = objectsToDraw[i].Sprite;
+    }
+
+    std::cout << "Initializing Render Data" << std::endl;
+
+    InitRenderData();
 }
 
 void BatchRenderer::BatchDraw(Texture2D texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
@@ -54,6 +85,7 @@ void BatchRenderer::BatchDraw(Texture2D texture, glm::vec2 position, glm::vec2 s
 
 void BatchRenderer::InitRenderData()
 {
+    /*
     int index = 0;
     float offset = 0.0f;
     for (int y = -BATCH_SIZE; y < BATCH_SIZE; ++y)
@@ -67,13 +99,13 @@ void BatchRenderer::InitRenderData()
             translations.push_back(translation);
         }
     }
+    */
 
     // store instance data in an array buffer
     // --------------------------------------
     unsigned int instanceVBO;
     glGenBuffers(1, &instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 1000000, &translations[0], GL_STATIC_DRAW);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * translations.size(), &translations[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 

@@ -42,6 +42,8 @@ static const int MAP_SIZE = 10;
 
 std::vector<std::vector<float>> PerlinNoiseMap(MAP_SIZE, std::vector<float>(MAP_SIZE));
 
+std::vector<GameObject> GameMap;
+
 void DrawOnScreenMessage(std::string message) { Text->RenderText(message, -400.0f, -300.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f)); }
 
 Game::Game(unsigned int width, unsigned int height) 
@@ -135,6 +137,30 @@ void Game::Init()
         }
     }
     */
+
+    std::cout << "Generating GameMap" << std::endl;
+
+    GameObject temp;
+    int index = 0;
+    float offset = 0.0f;
+    for (int y = -128; y < 128; ++y)
+    {
+        for (int x = -128; x < 128; ++x)
+        {
+            glm::vec2 translation;
+            translation.x = (float)x + offset;
+            translation.y = (float)y + offset;
+
+            temp = GameObject(translation, 0.0f, glm::vec2(1.0f, 1.0f), ResourceManager::GetTexture("block"), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f));
+
+            //translations[index++] = translation;
+            GameMap.push_back(temp);
+        }
+    }
+
+    std::cout << "Map Generation Done" << std::endl;
+
+    BRenderer->SetRenderData(GameMap);
 }
 
 void Game::Update(float deltaTime)
@@ -302,9 +328,6 @@ void Game::DrawStatic()
     position = glm::vec2(0.0f, -1.0f);
     Renderer->DrawSprite(ResourceManager::GetTexture("block"), position, scale, rotation, color);
 
-    position = glm::vec2(0.0f, 0.0f);
-    BRenderer->BatchDraw(ResourceManager::GetTexture("block"), position, scale, rotation, color);
-
     /*
     // Draw our generated perlin noise map
     for (int x = 0; x < PerlinNoiseMap.size(); ++x)
@@ -331,6 +354,9 @@ void Game::DrawStatic()
         }
     }
     */
+
+    position = glm::vec2(0.0f, 0.0f);
+    BRenderer->BatchDraw(ResourceManager::GetTexture("block"), position, scale, rotation, color);
 }
 
 void Game::DrawItems()
@@ -385,11 +411,11 @@ void Game::DoCollisions()
 bool Game::CheckCollision(GameObject& one, GameObject& two) // AABB - AABB collision
 {
     // collision x-axis?
-    bool collisionX = one.Position.x + one.Size.x >= two.Position.x &&
-        two.Position.x + two.Size.x >= one.Position.x;
+    bool collisionX = one.Position.x + one.Scale.x >= two.Position.x &&
+        two.Position.x + two.Scale.x >= one.Position.x;
     // collision y-axis?
-    bool collisionY = one.Position.y + one.Size.y >= two.Position.y &&
-        two.Position.y + two.Size.y >= one.Position.y;
+    bool collisionY = one.Position.y + one.Scale.y >= two.Position.y &&
+        two.Position.y + two.Scale.y >= one.Position.y;
     // collision only if on both axes
     return collisionX && collisionY;
 }

@@ -12,7 +12,7 @@ Player::Player(Texture2D sprite)
 
 	// Game Object Properties
 	this->Position = glm::vec2(0.0f, 0.0f);
-	this->Size = glm::vec2(1.0f, 1.0f);
+	this->Scale = glm::vec2(1.0f, 1.0f);
 	this->Sprite = sprite;
 	this->Color = glm::vec3(1.0f, 1.0f, 1.0f);
 	this->IsSolid = true;
@@ -31,7 +31,7 @@ Player::Player(glm::vec2 pos, glm::vec2 size, Texture2D sprite, glm::vec3 color)
 
 	// Game Object Properties
 	this->Position = pos;
-	this->Size = size;
+	this->Scale = size;
 	this->Sprite = sprite;
 	this->Color = color;
 	this->IsSolid = true;

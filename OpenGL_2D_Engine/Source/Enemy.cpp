@@ -10,7 +10,7 @@ Enemy::Enemy(unsigned int maxHealth, unsigned int damage, unsigned int armor,
 
 	// Game Object Properties
 	this->Position = pos;
-	this->Size = size;
+	this->Scale = size;
 	this->Sprite = sprite;
 	this->Color = color;
 	this->IsSolid = true;
