@@ -26,6 +26,7 @@ public:
     glm::vec2   Position, Scale, Velocity;
     glm::vec3   Color;
     float       Rotation;
+    glm::vec2   TextureCoordinates;
     bool        IsSolid;
     bool        Destroyed;
     // render state
@@ -33,6 +34,7 @@ public:
     // constructor(s)
     GameObject();
     GameObject(glm::vec2 pos, float rotation, glm::vec2 scale, Texture2D sprite, glm::vec3 color = glm::vec3(1.0f), glm::vec2 velocity = glm::vec2(0.0f, 0.0f));
+    GameObject(glm::vec2 pos, float rotation, glm::vec2 scale, glm::vec2 textureCoordinates, glm::vec3 color);
     // draw sprite
     virtual void Draw(SpriteRenderer& renderer);
 };

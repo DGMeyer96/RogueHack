@@ -1,14 +1,16 @@
 #include "Batch_Renderer.h"
 
-BatchRenderer::BatchRenderer(Shader shader, unsigned int screen_width, unsigned int screen_height, float world_unit)
+BatchRenderer::BatchRenderer(Shader shader, Texture2D tilemap, glm::vec2 cellSize, unsigned int screen_width, unsigned int screen_height, float world_unit)
 {
     this->shader = shader;
+    Tilemap = tilemap;
     this->Screen_Width = screen_width;
     this->Screen_Height = screen_height;
     this->World_Unit = world_unit;
     this->World_Origin = glm::vec2(Screen_Width / 2, Screen_Height / 2);
     //this->InitRenderData();
     Camera_Position = glm::vec2(0.0f, 0.0f);
+    CellDimensions = cellSize;
 
     //translations = new glm::vec2[BATCH_SIZE];
 }
@@ -26,7 +28,8 @@ BatchRenderer::~BatchRenderer()
     //scale = std::vector<glm::vec2>();
     Objects = std::vector<GameObject>();
     colors = std::vector<glm::vec3>();
-    sprites = std::vector<Texture2D>();
+    texOffsets = std::vector<glm::vec2>();
+    //sprites = std::vector<Texture2D>();
     modelMatrices = std::vector<glm::mat4>();
 }
 
@@ -40,7 +43,8 @@ void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
     //rotations.resize(objectsToDraw.size());
     //scale.resize(objectsToDraw.size());
     colors.resize(objectsToDraw.size());
-    sprites.resize(objectsToDraw.size());
+    texOffsets.resize(objectsToDraw.size());
+    //sprites.resize(objectsToDraw.size());
     modelMatrices.resize(objectsToDraw.size());
 
     for (int i = 0; i < objectsToDraw.size(); ++i)
@@ -49,8 +53,10 @@ void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
         //rotations[i] = objectsToDraw[i].Rotation;
         //scale[i] = objectsToDraw[i].Scale;
         colors[i] = objectsToDraw[i].Color;
-        sprites[i] = objectsToDraw[i].Sprite;
-
+        texOffsets[i] = glm::vec2(objectsToDraw[i].TextureCoordinates.x / (Tilemap.Width / CellDimensions.x), 
+                                objectsToDraw[i].TextureCoordinates.y / (Tilemap.Height / CellDimensions.y));
+        //texOffsets[i] = objectsToDraw[i].TextureCoordinates;
+        //sprites[i] = objectsToDraw[i].Sprite;
         modelMatrices[i] = UpdateModelMatrix(objectsToDraw[i]);
     }
 
@@ -59,7 +65,7 @@ void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
     InitRenderData();
 }
 
-void BatchRenderer::BatchDraw(Texture2D texture, glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
+void BatchRenderer::BatchDraw(glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
 {
     position.y *= -1.0f;    // +Y = UP and -Y = DOWN
     // prepare transformations
@@ -76,11 +82,7 @@ void BatchRenderer::BatchDraw(Texture2D texture, glm::vec2 position, glm::vec2 s
 
     camera = glm::scale(camera, glm::vec3(size, 1.0f));   // (1,1) scale is now a fixed world scale, regardless of resolution / aspect
 
-    //this->shader.SetMatrix4("model", model);
-    //this->shader.SetVector3f("spriteColor", color);
     shader.SetMatrix4("camera", camera);
-
-    //shader.SetVector2f("texCoordOffset", glm::vec2(cellPos.x / (Tilemap.Width / CellWidth), cellPos.y / (Tilemap.Height / CellHeight)));
 
     //std::cout << "Batch Draw" << std::endl;
     
@@ -92,7 +94,7 @@ void BatchRenderer::BatchDraw(Texture2D texture, glm::vec2 position, glm::vec2 s
     */
 
     glActiveTexture(GL_TEXTURE0);
-    texture.Bind();
+    Tilemap.Bind();
     
     // draw instanced quads
     glBindVertexArray(this->quadVAO);
@@ -120,6 +122,7 @@ void BatchRenderer::InitRenderData()
 
     // configure VAO/VBO
     unsigned int VBO;
+    /*
     float vertices[] = {
         // pos          // tex
         // Origin @ Center
@@ -127,6 +130,16 @@ void BatchRenderer::InitRenderData()
         0.5f, 0.5f,     1.0f, 1.0f,
         -0.5f, -0.5f,   0.0f, 0.0f,
         -0.5f, 0.5f,    0.0f, 1.0f
+    };
+    */
+
+    float vertices[] = {
+        // pos          // tex
+        // Origin @ Center
+        0.5f, -0.5f,    (CellDimensions.x / Tilemap.Width), 0.0f,
+        0.5f, 0.5f,     (CellDimensions.x / Tilemap.Width), (CellDimensions.y / Tilemap.Height),
+        -0.5f, -0.5f,   0.0f, 0.0f,
+        -0.5f, 0.5f,    0.0f, (CellDimensions.y / Tilemap.Height)
     };
 
     glGenVertexArrays(1, &this->quadVAO);
@@ -161,19 +174,7 @@ void BatchRenderer::InitRenderData()
         glVertexAttribDivisor(1 + i, 1);
     }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    /*
-    unsigned int instanceVBO_Pos;
-    glGenBuffers(1, &instanceVBO_Pos);
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO_Pos);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * translations.size(), &translations[0], GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 1);
 
-    glEnableVertexAttribArray(5);
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO_Pos);
-    glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glBindBuffer(GL_ARRAY_BUFFER, 1);
-    glVertexAttribDivisor(5, 1);    // Update Attribute 5 every 1 instance
-    */
     unsigned int instanceVBO_Color;
     glGenBuffers(1, &instanceVBO_Color);
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO_Color);
@@ -185,6 +186,18 @@ void BatchRenderer::InitRenderData()
     glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 1);
     glVertexAttribDivisor(5, 1);    // Update Attribute 6 every 1 instance
+
+    unsigned int instanceVBO_TexOffset;
+    glGenBuffers(1, &instanceVBO_TexOffset);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO_TexOffset);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * texOffsets.size(), &texOffsets[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 1);
+
+    glEnableVertexAttribArray(6);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO_TexOffset);
+    glVertexAttribPointer(6, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, 1);
+    glVertexAttribDivisor(6, 1);    // Update Attribute 6 every 1 instance
 }
 
 glm::mat4 BatchRenderer::UpdateModelMatrix(GameObject object)

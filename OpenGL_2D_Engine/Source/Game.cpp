@@ -63,6 +63,8 @@ Game::~Game()
 
 void Game::Init()
 {
+    InitPerformanceMetrics();
+
     // load shaders
     ResourceManager::LoadShader("./Shaders/Engine/Sprite.vert", "./Shaders/Engine/Sprite.frag", nullptr, "sprite");
     ResourceManager::LoadShader("./Shaders/Engine/Tile.vert", "./Shaders/Engine/Tile.frag", nullptr, "tile");
@@ -86,7 +88,6 @@ void Game::Init()
 
     // set render-specific controls
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"), Width, Height, WORLD_UNIT);
-    BRenderer = new BatchRenderer(ResourceManager::GetShader("batch"), Width, Height, WORLD_UNIT);
     //Particles = new ParticleGenerator(ResourceManager::GetShader("particle"), ResourceManager::GetTexture("particle"), 1000);
     //Effects = new PostProcessor(ResourceManager::GetShader("postprocessing"), Width, Height);
     
@@ -114,6 +115,7 @@ void Game::Init()
     Player_Object = new Player(ResourceManager::GetTexture("hero"));
     TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 
+    BRenderer = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
     
     // Initalize random seed
     srand(time(NULL));
@@ -167,21 +169,27 @@ void Game::Init()
     */
 
     std::cout << "Generating GameMap" << std::endl;
-
+    
+    int numObjects = 128;
     GameObject temp;
     int index = 0;
     float offset = 0.0f;
-    for (int y = -128; y < 128; ++y)
+    for (int y = -numObjects; y < numObjects; ++y)
     {
-        for (int x = -128; x < 128; ++x)
+        for (int x = -numObjects; x < numObjects; ++x)
         {
             glm::vec2 translation;
             translation.x = (float)x + offset;
             translation.y = (float)y + offset;
 
-            glm::vec3 color(((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)));
+            float rotation = 0.0f;
+            glm::vec2 scale = glm::vec2(1.0f, 1.0f);
 
-            temp = GameObject(translation, 0.0f, glm::vec2(1.0f, 1.0f), ResourceManager::GetTexture("block"), color, glm::vec2(0.0f, 0.0f));
+            glm::vec3 color(((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)));
+            glm::vec2 texCoords(((float)rand() / (RAND_MAX)) * 10.0f, ((float)rand() / (RAND_MAX)) * 10.0f);
+
+            //temp = GameObject(translation, 0.0f, glm::vec2(1.0f, 1.0f), ResourceManager::GetTexture("block"), color, glm::vec2(0.0f, 0.0f));
+            temp = GameObject(translation, rotation, scale, texCoords, glm::vec3(1.0f, 1.0f, 1.0f));
             GameMap.push_back(temp);
         }
     }
@@ -285,6 +293,16 @@ void Game::ProcessInput(float deltaTime)
             this->State = GAME_MENU;
         }
     }
+
+    if (this->Keys[GLFW_KEY_P] && !this->KeysProcessed[GLFW_KEY_P])
+    {
+        this->KeysProcessed[GLFW_KEY_P] = true;
+
+        if (bDrawPerformanceMetrics)
+            bDrawPerformanceMetrics = false;
+        else
+            bDrawPerformanceMetrics = true;
+    }
 }
 
 void Game::Render()
@@ -331,7 +349,9 @@ void Game::Render()
         );
     }
     
-    DrawOnScreenMessage("Debug Message Test");
+    //DrawOnScreenMessage("Debug Message Test");
+    if(bDrawPerformanceMetrics)
+        PerformanceMetrics();
 }
 
 void Game::ResetLevel()
@@ -384,7 +404,8 @@ void Game::DrawStatic()
     */
 
     position = glm::vec2(0.0f, 0.0f);
-    BRenderer->BatchDraw(ResourceManager::GetTexture("block"), position, scale, rotation, color);
+    //BRenderer->BatchDraw(ResourceManager::GetTexture("block"), position, scale, rotation, color);
+    BRenderer->BatchDraw(position, scale, rotation, color);
 }
 
 void Game::DrawItems()
@@ -429,6 +450,40 @@ void Game::DrawUI()
 {
     // draw UI
     Text->RenderText("ROGUE HACK!", Width * -0.08f, Height * 0.45f, 1.0f);
+}
+
+void Game::InitPerformanceMetrics()
+{
+    // Used for Performance Metrics
+    lastTime = glfwGetTime();
+    numFrames = 0;
+    fps = 0.0f;
+    frameTime = 0.0f;
+}
+
+void Game::PerformanceMetrics()
+{
+    // Measure speed
+    double currentTime = glfwGetTime();
+    numFrames++;
+    if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+        // printf and reset timer
+        frameTime = 1000.0 / (float)numFrames;
+        fps = numFrames / (currentTime - lastTime);
+
+        std::cout << "FPS: " << fps << std::endl;
+        std::cout << "Frametime: " << frameTime << std::endl;
+
+        //DrawOnScreenMessage("FPS: " + std::to_string(fps) + "\n" + "Frametime: " + std::to_string(frameTime));
+
+        printf("%f ms/frame\n", 1000.0 / double(numFrames));
+        numFrames = 0;
+        lastTime += 1.0;
+    }
+
+    // draw UI
+    Text->RenderText("FPS: " + std::to_string(fps), Width * -0.45f, Height * 0.45f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    Text->RenderText("Frametime: " + std::to_string(frameTime), Width * -0.45f, Height * 0.4f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 void Game::DoCollisions()
