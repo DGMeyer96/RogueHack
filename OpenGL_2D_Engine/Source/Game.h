@@ -70,8 +70,6 @@ public:
 private:
     float WORLD_UNIT;
 
-
-
     const std::string Engine_Shader_Path = "./Shaders/Engine/";
     const std::string Shader_Path = "./Shaders/";
     const std::string Texture_Path = "./Assets/Textures/";

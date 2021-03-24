@@ -28,7 +28,10 @@ float ShakeTime = 0.0f;
 // Game-related State data
 SpriteRenderer*     Renderer;
 TilemapRenderer*    TRenderer;
-BatchRenderer*      BRenderer;
+BatchRenderer*      Renderer_Static;
+BatchRenderer*      Renderer_Dynamic;
+BatchRenderer*      Renderer_Items;
+BatchRenderer*      Renderer_Player;
 ParticleGenerator*  Particles;
 PostProcessor*      Effects;
 ISoundEngine*       SoundEngine = createIrrKlangDevice();
@@ -42,6 +45,9 @@ static const int MAP_SIZE = 1000;
 std::vector<std::vector<float>> PerlinNoiseMap(MAP_SIZE, std::vector<float>(MAP_SIZE));
 
 std::vector<GameObject> GameMap;
+std::vector<GameObject> Dynamic;
+std::vector<GameObject> Items;
+std::vector<GameObject> PlayerObjects;
 
 void DrawOnScreenMessage(std::string message) { Text->RenderText(message, -400.0f, -300.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f)); }
 
@@ -54,6 +60,10 @@ Game::Game(unsigned int width, unsigned int height)
 Game::~Game()
 {
     delete Renderer;
+    delete Renderer_Static;
+    delete Renderer_Dynamic;
+    delete Renderer_Items;
+    delete Renderer_Player;
     delete Player_Object;
     delete Particles;
     delete Effects;
@@ -115,7 +125,10 @@ void Game::Init()
     Player_Object = new Player(ResourceManager::GetTexture("hero"));
     TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 
-    BRenderer = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
+    Renderer_Static = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
+    Renderer_Dynamic = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("enemy"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
+    Renderer_Items = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("chest"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
+    Renderer_Player = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("hero"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
     
     // Initalize random seed
     srand(time(NULL));
@@ -196,7 +209,10 @@ void Game::Init()
 
     std::cout << "Map Generation Done" << std::endl;
 
-    BRenderer->SetRenderData(GameMap);
+    Renderer_Static->SetRenderData(GameMap);
+
+    PlayerObjects.push_back(*Player_Object);
+    Renderer_Player->SetRenderData(PlayerObjects);
 }
 
 void Game::Update(float deltaTime)
@@ -311,7 +327,7 @@ void Game::Render()
     Renderer->DrawSprite(ResourceManager::GetTexture("background"),
         glm::vec2(0.0f, 0.0f), glm::vec2(48.0f, 27.0f), 0.0f);
 
-    DrawStatic();
+    //DrawStatic();
 
     if (this->State == GAME_ACTIVE || this->State == GAME_MENU)
     {
@@ -331,9 +347,12 @@ void Game::Render()
         // Smooth Lerp Camera
         TRenderer->UpdateCameraPosition(GameMath::Lerp(TRenderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
         Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
-        BRenderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+        Renderer_Static->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+        Renderer_Dynamic->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+        Renderer_Items->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+        Renderer_Player->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
 
-        //DrawStatic();
+        DrawStatic();
         DrawItems();
         DrawDynamic();
         DrawPlayer();
@@ -404,8 +423,8 @@ void Game::DrawStatic()
     */
 
     position = glm::vec2(0.0f, 0.0f);
-    //BRenderer->BatchDraw(ResourceManager::GetTexture("block"), position, scale, rotation, color);
-    BRenderer->BatchDraw(position, scale, rotation, color);
+    //Renderer_Static->BatchDraw(ResourceManager::GetTexture("block"), position, scale, rotation, color);
+    Renderer_Static->BatchDraw(position, scale, rotation, color);
 }
 
 void Game::DrawItems()
@@ -443,7 +462,12 @@ void Game::DrawPlayer()
     glm::vec3 color(1.0f, 1.0f, 1.0f);
 
     // Draw the player last so they are on top
-    Player_Object->Draw(*Renderer);
+    //Player_Object->Draw(*Renderer);
+
+    PlayerObjects = std::vector<GameObject>();
+    PlayerObjects.push_back(*Player_Object);
+    Renderer_Player->UpdateTransforms(PlayerObjects);
+    Renderer_Player->BatchDraw(Player_Object->Position, Player_Object->Scale, Player_Object->Rotation, Player_Object->Color);
 }
 
 void Game::DrawUI()

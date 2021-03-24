@@ -29,7 +29,7 @@ BatchRenderer::~BatchRenderer()
 
 void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
 {
-    std::cout << "Setting Render Data" << std::endl;
+    //std::cout << "Setting Render Data" << std::endl;
 
     colors.resize(objectsToDraw.size());
     texOffsets.resize(objectsToDraw.size());
@@ -43,7 +43,7 @@ void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
         modelMatrices[i] = UpdateModelMatrix(objectsToDraw[i]);
     }
 
-    std::cout << "Initializing Render Data" << std::endl;
+    //std::cout << "Initializing Render Data" << std::endl;
 
     InitRenderData();
 }
