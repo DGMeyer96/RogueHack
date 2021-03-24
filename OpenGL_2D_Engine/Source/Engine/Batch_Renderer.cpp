@@ -1,4 +1,5 @@
 #include "Batch_Renderer.h"
+#include <chrono>
 
 BatchRenderer::BatchRenderer(Shader shader, Texture2D tilemap, glm::vec2 cellSize, unsigned int screen_width, unsigned int screen_height, float world_unit)
 {
@@ -11,8 +12,6 @@ BatchRenderer::BatchRenderer(Shader shader, Texture2D tilemap, glm::vec2 cellSiz
     //this->InitRenderData();
     Camera_Position = glm::vec2(0.0f, 0.0f);
     CellDimensions = cellSize;
-
-    //translations = new glm::vec2[BATCH_SIZE];
 }
 
 BatchRenderer::~BatchRenderer()
@@ -23,46 +22,52 @@ BatchRenderer::~BatchRenderer()
     glDeleteBuffers(1, &quadVBO);
 
     // de-allocate memory
-    //translations = std::vector<glm::vec2>();
-    //rotations = std::vector<float>();
-    //scale = std::vector<glm::vec2>();
-    Objects = std::vector<GameObject>();
     colors = std::vector<glm::vec3>();
     texOffsets = std::vector<glm::vec2>();
-    //sprites = std::vector<Texture2D>();
     modelMatrices = std::vector<glm::mat4>();
 }
 
 void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
 {
-    Objects = objectsToDraw;
-
     std::cout << "Setting Render Data" << std::endl;
-    
-    //translations.resize(objectsToDraw.size());
-    //rotations.resize(objectsToDraw.size());
-    //scale.resize(objectsToDraw.size());
+
     colors.resize(objectsToDraw.size());
     texOffsets.resize(objectsToDraw.size());
-    //sprites.resize(objectsToDraw.size());
     modelMatrices.resize(objectsToDraw.size());
 
     for (int i = 0; i < objectsToDraw.size(); ++i)
     {
-        //translations[i] = objectsToDraw[i].Position;
-        //rotations[i] = objectsToDraw[i].Rotation;
-        //scale[i] = objectsToDraw[i].Scale;
         colors[i] = objectsToDraw[i].Color;
         texOffsets[i] = glm::vec2(objectsToDraw[i].TextureCoordinates.x / (Tilemap.Width / CellDimensions.x), 
                                 objectsToDraw[i].TextureCoordinates.y / (Tilemap.Height / CellDimensions.y));
-        //texOffsets[i] = objectsToDraw[i].TextureCoordinates;
-        //sprites[i] = objectsToDraw[i].Sprite;
         modelMatrices[i] = UpdateModelMatrix(objectsToDraw[i]);
     }
 
     std::cout << "Initializing Render Data" << std::endl;
 
     InitRenderData();
+}
+
+void BatchRenderer::SetTilemap(Texture2D tilemap, glm::vec2 cellSize)
+{
+    Tilemap = tilemap;
+    CellDimensions = cellSize;
+}
+
+void BatchRenderer::UpdateTransforms(std::vector<GameObject> objectsToDraw)
+{
+    std::chrono::steady_clock::time_point start, end;
+    std::cout << "Batch Renderer Transform Update" << std::endl;
+    start = std::chrono::steady_clock::now();
+
+    modelMatrices.resize(objectsToDraw.size());
+    for (int i = 0; i < objectsToDraw.size(); ++i)
+    {
+        modelMatrices[i] = UpdateModelMatrix(objectsToDraw[i]);
+    }
+
+    end = std::chrono::steady_clock::now();
+    std::cout << "Elapsed Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 }
 
 void BatchRenderer::BatchDraw(glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
@@ -85,54 +90,20 @@ void BatchRenderer::BatchDraw(glm::vec2 position, glm::vec2 size, float rotate, 
     shader.SetMatrix4("camera", camera);
 
     //std::cout << "Batch Draw" << std::endl;
-    
-    /*
-    for (int i = 0; i < modelMatrices.size(); ++i)
-    {
-        modelMatrices[i] = UpdateModelMatrix(Objects[i]);
-    }
-    */
 
     glActiveTexture(GL_TEXTURE0);
     Tilemap.Bind();
     
     // draw instanced quads
     glBindVertexArray(this->quadVAO);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, Objects.size()); // 100 triangles of 6 vertices each
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, modelMatrices.size()); // 100 triangles of 6 vertices each
     glBindVertexArray(0);
 }
 
 void BatchRenderer::InitRenderData()
 {
-    /*
-    int index = 0;
-    float offset = 0.0f;
-    for (int y = -BATCH_SIZE; y < BATCH_SIZE; ++y)
-    {
-        for (int x = -BATCH_SIZE; x < BATCH_SIZE; ++x)
-        {
-            glm::vec2 translation;
-            translation.x = (float)x + offset;
-            translation.y = (float)y + offset;
-            //translations[index++] = translation;
-            translations.push_back(translation);
-        }
-    }
-    */
-
     // configure VAO/VBO
     unsigned int VBO;
-    /*
-    float vertices[] = {
-        // pos          // tex
-        // Origin @ Center
-        0.5f, -0.5f,    1.0f, 0.0f,
-        0.5f, 0.5f,     1.0f, 1.0f,
-        -0.5f, -0.5f,   0.0f, 0.0f,
-        -0.5f, 0.5f,    0.0f, 1.0f
-    };
-    */
-
     float vertices[] = {
         // pos          // tex
         // Origin @ Center

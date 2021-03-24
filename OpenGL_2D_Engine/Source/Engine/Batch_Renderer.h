@@ -36,6 +36,9 @@ public:
 	~BatchRenderer();
 
     void SetRenderData(std::vector<GameObject> objectsToDraw);
+    void SetTilemap(Texture2D tilemap, glm::vec2 cellSize);
+
+    void UpdateTransforms(std::vector<GameObject> objectsToDraw);
 
     void BatchDraw(glm::vec2 position, glm::vec2 size = glm::vec2(1.0f, 1.0f), float rotate = 0.0f,
         glm::vec3 color = glm::vec3(1.0f));
@@ -55,15 +58,9 @@ private:
 
     int BATCH_SIZE = 512; // small = 128 (256^2 = 65,536), medium = 256 (512^2 = 262,144), large = 512 (1024^2 = 1,048,576)
 
-    std::vector<GameObject> Objects;
     std::vector<glm::mat4> modelMatrices;
     std::vector<glm::vec3> colors;
     std::vector<glm::vec2> texOffsets;
-
-    //std::vector<glm::vec2> translations;
-    //std::vector<float> rotations;
-    //std::vector<glm::vec2> scale;
-    //std::vector<Texture2D> sprites;
 
 	void InitRenderData();
     glm::mat4 UpdateModelMatrix(GameObject object);
