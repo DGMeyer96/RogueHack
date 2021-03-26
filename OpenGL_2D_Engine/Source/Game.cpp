@@ -42,7 +42,6 @@ TextRenderer*       Text;
 Player* Player_Object;
 
 static const int MAP_SIZE = 1000;
-
 std::vector<std::vector<float>> PerlinNoiseMap(MAP_SIZE, std::vector<float>(MAP_SIZE));
 
 std::vector<GameObject> GameMap;
@@ -137,7 +136,6 @@ void Game::Init()
     std::chrono::steady_clock::time_point start, end;
     
     // Test implementation for STB perlin noise 
-
     std::cout << "STB Noise Test" << std::endl;
     Timer t;
     t.StartTimer();
@@ -349,10 +347,10 @@ void Game::Render()
         // Smooth Lerp Camera
         TRenderer->UpdateCameraPosition(GameMath::Lerp(TRenderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
         Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
-        Renderer_Static->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
-        Renderer_Dynamic->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
-        Renderer_Items->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
-        Renderer_Player->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+        Renderer_Static->UpdateCameraPosition(GameMath::Lerp(Renderer_Static->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+        Renderer_Dynamic->UpdateCameraPosition(GameMath::Lerp(Renderer_Dynamic->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+        Renderer_Items->UpdateCameraPosition(GameMath::Lerp(Renderer_Items->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
+        Renderer_Player->UpdateCameraPosition(GameMath::Lerp(Renderer_Player->GetCameraPosition(), glm::vec2(Player_Object->Position.x, -Player_Object->Position.y), 0.05f));
 
         DrawStatic();
         DrawItems();

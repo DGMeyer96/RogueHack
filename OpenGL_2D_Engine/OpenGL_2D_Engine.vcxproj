@@ -148,6 +148,7 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="Source\Enemy.cpp" />
     <ClCompile Include="Source\Engine\Batch_Renderer.cpp" />
+    <ClCompile Include="Source\Engine\Engine.cpp" />
     <ClCompile Include="Source\Engine\Game_Math.cpp" />
     <ClCompile Include="Source\Engine\Game_Object.cpp" />
     <ClCompile Include="Source\Engine\Particle_Generator.cpp" />
@@ -168,6 +169,7 @@
   <ItemGroup>
     <ClInclude Include="Source\Enemy.h" />
     <ClInclude Include="Source\Engine\Batch_Renderer.h" />
+    <ClInclude Include="Source\Engine\Engine.h" />
     <ClInclude Include="Source\Engine\Game_Math.h" />
     <ClInclude Include="Source\Engine\Game_Object.h" />
     <ClInclude Include="Source\Engine\Particle_Generator.h" />
