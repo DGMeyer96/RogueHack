@@ -178,6 +178,7 @@
     <ClInclude Include="Source\Engine\Texture.h" />
     <ClInclude Include="Source\Engine\Text_Renderer.h" />
     <ClInclude Include="Source\Engine\Tilemap_Renderer.h" />
+    <ClInclude Include="Source\Engine\Timer.h" />
     <ClInclude Include="Source\Game.h" />
     <ClInclude Include="Source\Game_Level.h" />
     <ClInclude Include="Source\Item.h" />

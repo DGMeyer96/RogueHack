@@ -13,6 +13,7 @@
 #include "Engine/Particle_Generator.h"
 #include "Engine/Post_Processor.h"
 #include "Engine/Text_Renderer.h"
+#include "Engine/Timer.h"
 // Audio Engine
 #include <irrklang/irrKlang.h>
 using namespace irrklang;
@@ -21,7 +22,7 @@ using namespace irrklang;
 // C++ Includes
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
-#include <chrono>       /* C++11 time, more accurate for debugging */
+//#include <chrono>       /* C++11 time, more accurate for debugging, replaced by Timer.h */
 
 float ShakeTime = 0.0f;
 
@@ -138,7 +139,8 @@ void Game::Init()
     // Test implementation for STB perlin noise 
 
     std::cout << "STB Noise Test" << std::endl;
-    start = std::chrono::steady_clock::now();
+    Timer t;
+    t.StartTimer();
     float noiseVal;
     for (int x = 0; x < MAP_SIZE; ++x)
     {
@@ -155,8 +157,8 @@ void Game::Init()
             //std::cout << noiseVal << std::endl;
         }
     }
-    end = std::chrono::steady_clock::now();
-    std::cout << "Elapsed Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    t.StopTimer();
+    std::cout << "Elapsed Time: " << t.ElapsedTimeMS() << "ms" << std::endl;
     
     /*
     // Test implementation for GLM perlin noise 
