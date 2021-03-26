@@ -17,6 +17,7 @@
 #include FT_FREETYPE_H
 
 #include "Game.h"
+#include "Engine/Engine.h"
 #include "Engine/Resource_Manager.h"
 
 #include <iostream>
@@ -32,7 +33,9 @@ const unsigned int SCREEN_HEIGHT = 720;
 
 float DEFAULT_MONITOR_REFRESH = 62.0f;
 
-Game RogueHack(SCREEN_WIDTH, SCREEN_HEIGHT);
+Engine RHEngine(SCREEN_WIDTH, SCREEN_HEIGHT);
+Game RogueHack(SCREEN_WIDTH, SCREEN_HEIGHT, &RHEngine);
+
 
 int main(int argc, char* argv[])
 {
@@ -92,8 +95,9 @@ int main(int argc, char* argv[])
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // initialize game
+    // initialize engine & game
     // ---------------
+    RHEngine.Init();
     RogueHack.Init();
 
     // deltaTime variables
@@ -122,7 +126,7 @@ int main(int argc, char* argv[])
         // ------
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        RogueHack.Render();
+        RHEngine.Render();
 
         glfwSwapBuffers(window);
     }

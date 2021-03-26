@@ -19,6 +19,7 @@
 #include "Post_Processor.h"
 #include "Text_Renderer.h"
 #include "Timer.h"
+#include "Text.h"
 // Audio Engine
 #include <irrklang/irrKlang.h>
 using namespace irrklang;
@@ -40,6 +41,8 @@ class Engine
 {
 public:
     unsigned int            Width, Height;
+    bool bDrawPerformanceMetrics;
+
     // Engine-related State data
     SpriteRenderer* Renderer;
     TilemapRenderer* TRenderer;
@@ -51,11 +54,6 @@ public:
     PostProcessor* Effects;
     ISoundEngine* SoundEngine = createIrrKlangDevice();
     TextRenderer* Text;
-    // Layer Style Game Object lists for Batch Renderer
-    std::vector<GameObject> GameMap;
-    std::vector<GameObject> Dynamic;
-    std::vector<GameObject> Items;
-    std::vector<GameObject> PlayerObjects;
 
     // constructor/destructor
     Engine(unsigned int width, unsigned int height);
@@ -72,9 +70,14 @@ public:
     // Collision Detection
     bool CheckCollision(GameObject& one, GameObject& two);
 
+    // Update Camera Position data for each render layer
     void UpdateCamera(glm::vec2 player_pos);
 
-
+    // Update Render Layer data
+    void UpdateStaticObjectPool(std::vector<GameObject> objects) { Renderer_Static->SetRenderData(objects); }
+    void UpdateItemObjectPool(std::vector<GameObject> objects) { Renderer_Items->SetRenderData(objects); }
+    void UpdateDynamicObjectPool(std::vector<GameObject> objects) { Renderer_Dynamic->SetRenderData(objects); }
+    void UpdatePlayerObjectPool(std::vector<GameObject> objects) { Renderer_Player->SetRenderData(objects); }
 
 private:
     float WORLD_UNIT;
@@ -83,13 +86,14 @@ private:
     const std::string Shader_Path = "./Shaders/";
     const std::string Texture_Path = "./Assets/Textures/";
 
+    // Render Layers
     void DrawStatic();
-    void DrawItems();
+    void DrawItems();   
     void DrawDynamic();
     void DrawPlayer();
     void DrawUI();
 
-    bool bDrawPerformanceMetrics;
+    // Performance Metric
     double lastTime;
     int numFrames;
     float frameTime, fps;

@@ -16,7 +16,6 @@ Engine::Engine(unsigned int width, unsigned int height)
 
 Engine::~Engine()
 {
-    
     delete Renderer;
     delete Renderer_Static;
     delete Renderer_Dynamic;
@@ -26,7 +25,6 @@ Engine::~Engine()
     delete Effects;
     delete SoundEngine;
     delete Text;
-    
 }
 
 void Engine::Init()
@@ -77,7 +75,7 @@ void Engine::Init()
     ResourceManager::LoadTexture("./Assets/Textures/chest.png", true, "chest");
     ResourceManager::LoadTexture("./Assets/Textures/block.png", false, "block");
 
-    TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
+    //TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 
     Renderer_Static = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
     Renderer_Dynamic = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("enemy"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
@@ -86,14 +84,15 @@ void Engine::Init()
 
     // Initalize random seed
     srand(time(NULL));
-
 }
 
 void Engine::Render()
 {
+    std::cout << "Render Loop" << std::endl;
+
     DrawStatic();
-    DrawItems();
-    DrawDynamic();
+    //DrawItems();
+    //DrawDynamic();
     DrawPlayer();
     DrawUI();
 
@@ -116,12 +115,12 @@ bool Engine::CheckCollision(GameObject& one, GameObject& two)   // AABB - AABB c
 void Engine::UpdateCamera(glm::vec2 player_pos)
 {
     // Smooth Lerp Camera
-    TRenderer->UpdateCameraPosition(GameMath::Lerp(TRenderer->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
-    Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
+    //TRenderer->UpdateCameraPosition(GameMath::Lerp(TRenderer->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
+    //Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
     Renderer_Static->UpdateCameraPosition(GameMath::Lerp(Renderer_Static->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
     Renderer_Dynamic->UpdateCameraPosition(GameMath::Lerp(Renderer_Dynamic->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
     Renderer_Items->UpdateCameraPosition(GameMath::Lerp(Renderer_Items->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
-    Renderer_Player->UpdateCameraPosition(GameMath::Lerp(Renderer_Player->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
+    //Renderer_Player->UpdateCameraPosition(GameMath::Lerp(Renderer_Player->GetCameraPosition(), glm::vec2(player_pos.x, player_pos.y), 0.05f));
 }
 
 void Engine::DrawStatic()
@@ -131,7 +130,11 @@ void Engine::DrawStatic()
     float rotation = 0.0f;
     glm::vec3 color(1.0f, 1.0f, 1.0f);
 
+    std::cout << "Static Object Draw STARTING" << std::endl;
+
     Renderer_Static->BatchDraw(position, scale, rotation, color);
+
+    std::cout << "Static Object Draw COMPLETE" << std::endl;
 }
 
 void Engine::DrawItems()

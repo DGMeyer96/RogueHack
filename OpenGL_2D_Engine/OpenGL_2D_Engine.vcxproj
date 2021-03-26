@@ -177,6 +177,7 @@
     <ClInclude Include="Source\Engine\Resource_Manager.h" />
     <ClInclude Include="Source\Engine\Shader.h" />
     <ClInclude Include="Source\Engine\Sprite_Renderer.h" />
+    <ClInclude Include="Source\Engine\Text.h" />
     <ClInclude Include="Source\Engine\Texture.h" />
     <ClInclude Include="Source\Engine\Text_Renderer.h" />
     <ClInclude Include="Source\Engine\Tilemap_Renderer.h" />

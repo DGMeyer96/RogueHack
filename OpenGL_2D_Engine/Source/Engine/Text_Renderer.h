@@ -14,8 +14,9 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "texture.h"
-#include "shader.h"
+#include "Texture.h"
+#include "Shader.h"
+#include "Text.h"
 
 #define FONT_PATH "./Assets/Fonts/"
 
@@ -44,6 +45,7 @@ public:
     void Load(std::string font, unsigned int fontSize);
     // renders a string of text using the precompiled list of characters
     void RenderText(std::string text, float x, float y, float scale, glm::vec3 color = glm::vec3(1.0f));
+    void RenderText(Text text);
 private:
     // render state
     unsigned int VAO, VBO;

@@ -12,6 +12,7 @@
 
 #include "Game_Level.h"
 #include "Engine/Game_Math.h"
+#include "Engine/Engine.h"
 
 #define ENGINE_SHADER_PATH "./Shaders/Engine/"
 #define SHADER_PATH "./Shaders/"
@@ -27,11 +28,8 @@ enum GameState {
     GAME_WIN
 };
 
-// Defines a Collision typedef that represents collision data
-typedef std::tuple<bool, Direction, glm::vec2> Collision; // <collision?, what direction?, difference vector center - closest point>
-
 // The scale of 1 unit in the game (this is a % of the resolution Y)
-const float WORLD_SCALE = 0.05f;
+//const float WORLD_SCALE = 0.05f;
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
@@ -48,7 +46,7 @@ public:
     unsigned int            Level;
 
     // constructor/destructor
-    Game(unsigned int width, unsigned int height);
+    Game(unsigned int width, unsigned int height, Engine* game_engine);
     ~Game();
 
     // initialize game state (load all shaders/textures/levels)
@@ -57,35 +55,25 @@ public:
     // game loop
     void ProcessInput(float deltaTime);
     void Update(float deltaTime);
-    void Render();
 
     // Collisions
     void DoCollisions();
-    bool CheckCollision(GameObject& one, GameObject& two);
+
+    void MainMenu();
+    void PauseGame();
+    void NewGame();
+    void LoadGame();
+
+    void LoadingScreen();
+    void ChangeLevel();
 
     // Reset Game
     void ResetLevel();
     void ResetPlayer();
 
 private:
-    float WORLD_UNIT;
-
-    const std::string Engine_Shader_Path = "./Shaders/Engine/";
-    const std::string Shader_Path = "./Shaders/";
-    const std::string Texture_Path = "./Assets/Textures/";
-
-    void DrawStatic();
-    void DrawItems();
-    void DrawDynamic();
-    void DrawPlayer();
-    void DrawUI();
-
-    bool bDrawPerformanceMetrics;
-    double lastTime;
-    int numFrames;
-    float frameTime, fps;
-    void InitPerformanceMetrics();
-    void PerformanceMetrics();
+    Engine* GameEngine;
+    //float WORLD_UNIT;
 };
 
 #endif

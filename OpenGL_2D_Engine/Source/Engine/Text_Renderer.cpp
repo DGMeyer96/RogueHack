@@ -141,3 +141,48 @@ void TextRenderer::RenderText(std::string text, float x, float y, float scale, g
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void TextRenderer::RenderText(Text text)
+{
+    // activate corresponding render state	
+    this->TextShader.Use();
+    this->TextShader.SetVector3f("textColor", text.Color);
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(this->VAO);
+
+    // iterate through all characters
+    std::string::const_iterator c;
+    for (c = text.String.begin(); c != text.String.end(); c++)
+    {
+        Character ch = Characters[*c];
+
+        // Include world origin to put text in center & -y so Up = +y
+        float xpos = World_Origin.x + text.Position.x + ch.Bearing.x * text.Scale;
+        float ypos = World_Origin.y - text.Position.y + (this->Characters['H'].Bearing.y - ch.Bearing.y) * text.Scale;
+
+        float w = ch.Size.x * text.Scale;
+        float h = ch.Size.y * text.Scale;
+        // update VBO for each character
+        float vertices[6][4] = {
+            { xpos,     ypos + h,   0.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 0.0f },
+            { xpos,     ypos,       0.0f, 0.0f },
+
+            { xpos,     ypos + h,   0.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 0.0f }
+        };
+        // render glyph texture over quad
+        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+        // update content of VBO memory
+        glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        // render quad
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        // now advance cursors for next glyph
+        text.Position.x += (ch.Advance >> 6) * text.Scale; // bitshift by 6 to get value in pixels (1/64th times 2^6 = 64)
+    }
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}

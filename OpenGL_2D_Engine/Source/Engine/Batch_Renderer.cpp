@@ -29,7 +29,7 @@ BatchRenderer::~BatchRenderer()
 
 void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
 {
-    //std::cout << "Setting Render Data" << std::endl;
+    //std::cout << "Setting Render Data of size: " << objectsToDraw.size() << std::endl;
 
     colors.resize(objectsToDraw.size());
     texOffsets.resize(objectsToDraw.size());
@@ -46,6 +46,8 @@ void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
     //std::cout << "Initializing Render Data" << std::endl;
 
     InitRenderData();
+
+    //std::cout << "Render Data SET" << std::endl;
 }
 
 void BatchRenderer::SetTilemap(Texture2D tilemap, glm::vec2 cellSize)
