@@ -112,15 +112,12 @@ bool Engine::CheckCollision(GameObject& one, GameObject& two)   // AABB - AABB c
     return collisionX && collisionY;
 }
 
-void Engine::UpdateCamera(glm::vec2 player_pos)
+void Engine::UpdateCamera(glm::vec2 player_pos, float time)
 {
     // Smooth Lerp Camera
-    //TRenderer->UpdateCameraPosition(GameMath::Lerp(TRenderer->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
-    //Renderer->UpdateCameraPosition(GameMath::Lerp(Renderer->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
-    Renderer_Static->UpdateCameraPosition(GameMath::Lerp(Renderer_Static->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
-    Renderer_Dynamic->UpdateCameraPosition(GameMath::Lerp(Renderer_Dynamic->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
-    Renderer_Items->UpdateCameraPosition(GameMath::Lerp(Renderer_Items->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), 0.05f));
-    //Renderer_Player->UpdateCameraPosition(GameMath::Lerp(Renderer_Player->GetCameraPosition(), glm::vec2(player_pos.x, player_pos.y), 0.05f));
+    Renderer_Static->UpdateCameraPosition(GameMath::Lerp(Renderer_Static->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), time));
+    Renderer_Items->UpdateCameraPosition(GameMath::Lerp(Renderer_Items->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), time));
+    Renderer_Dynamic->UpdateCameraPosition(glm::vec2(player_pos.x, -player_pos.y));
 }
 
 void Engine::DrawStatic()

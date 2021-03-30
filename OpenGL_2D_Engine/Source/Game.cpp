@@ -104,8 +104,14 @@ void Game::Update(float deltaTime)
     // update particles
     //Particles->Update(deltaTime, *Ball, 1, glm::vec2(Ball->Radius / 2.0f));
 
-    if(this->State == GAME_ACTIVE)
+    if (this->State == GAME_ACTIVE)
+    {
         GameEngine->UpdatePlayerObjectPool(PlayerObjects);
+        GameEngine->UpdateCamera(Player_Object->Position, deltaTime * 5.0f);
+
+        
+    }
+        
 }
 
 void Game::ProcessInput(float deltaTime)
@@ -182,7 +188,7 @@ void Game::ProcessInput(float deltaTime)
                 this->KeysProcessed[GLFW_KEY_RIGHT] = true;
             }
 
-            GameEngine->UpdateCamera(Player_Object->Position);
+            //GameEngine->UpdateCamera(Player_Object->Position);
         }
     }
     if (this->State == GAME_WIN)

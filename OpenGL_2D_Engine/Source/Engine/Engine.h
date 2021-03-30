@@ -71,7 +71,7 @@ public:
     bool CheckCollision(GameObject& one, GameObject& two);
 
     // Update Camera Position data for each render layer
-    void UpdateCamera(glm::vec2 player_pos);
+    void UpdateCamera(glm::vec2 player_pos, float deltaTime);
 
     // Update Render Layer data
     void UpdateStaticObjectPool(std::vector<GameObject> objects) { Renderer_Static->SetRenderData(objects); }
