@@ -7,6 +7,7 @@
 //#include <chrono>       /* C++11 time, more accurate for debugging, replaced by Timer.h */
 
 
+
 Engine::Engine(unsigned int width, unsigned int height)
 {
 	Width = width;
@@ -16,7 +17,7 @@ Engine::Engine(unsigned int width, unsigned int height)
 
 Engine::~Engine()
 {
-    delete Renderer;
+    delete Renderer_Sprite;
     delete Renderer_Static;
     delete Renderer_Dynamic;
     delete Renderer_Items;
@@ -24,7 +25,7 @@ Engine::~Engine()
     delete Particles;
     delete Effects;
     delete SoundEngine;
-    delete Text;
+    delete Renderer_Text;
 }
 
 void Engine::Init()
@@ -53,7 +54,7 @@ void Engine::Init()
     ResourceManager::GetShader("particle").SetMatrix4("projection", projection);
 
     // set render-specific controls
-    Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"), Width, Height, WORLD_UNIT);
+    Renderer_Sprite = new SpriteRenderer(ResourceManager::GetShader("sprite"), Width, Height, WORLD_UNIT);
     //Particles = new ParticleGenerator(ResourceManager::GetShader("particle"), ResourceManager::GetTexture("particle"), 1000);
     //Effects = new PostProcessor(ResourceManager::GetShader("postprocessing"), Width, Height);
 
@@ -63,8 +64,8 @@ void Engine::Init()
     SoundEngine->play2D(BGM.c_str(), true);
 
     // Load Font
-    Text = new TextRenderer(this->Width, this->Height);
-    Text->Load("ocraext.TTF", 32);
+    Renderer_Text = new TextRenderer(this->Width, this->Height);
+    Renderer_Text->Load("ocraext.TTF", 32);
 
     // load textures
     ResourceManager::LoadTexture("./Assets/Textures/background.jpg", false, "background");
@@ -81,6 +82,7 @@ void Engine::Init()
     Renderer_Dynamic = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("enemy"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
     Renderer_Items = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("chest"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
     Renderer_Player = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("hero"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
+    Renderer_UI = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("background"), glm::vec2(1600.0f, 900.0f), Width, Height, WORLD_UNIT);
 
     // Initalize random seed
     srand(time(NULL));
@@ -88,11 +90,11 @@ void Engine::Init()
 
 void Engine::Render()
 {
-    std::cout << "Render Loop" << std::endl;
+    //std::cout << "Render Loop" << std::endl;
 
     DrawStatic();
-    //DrawItems();
-    //DrawDynamic();
+    DrawItems();
+    DrawDynamic();
     DrawPlayer();
     DrawUI();
 
@@ -127,11 +129,9 @@ void Engine::DrawStatic()
     float rotation = 0.0f;
     glm::vec3 color(1.0f, 1.0f, 1.0f);
 
-    std::cout << "Static Object Draw STARTING" << std::endl;
-
-    Renderer_Static->BatchDraw(position, scale, rotation, color);
-
-    std::cout << "Static Object Draw COMPLETE" << std::endl;
+    //std::cout << "Static Object Draw STARTING" << std::endl;
+    Renderer_Static->BatchDraw(position, rotation, scale, color);
+   // std::cout << "Static Object Draw COMPLETE" << std::endl;
 }
 
 void Engine::DrawItems()
@@ -141,7 +141,9 @@ void Engine::DrawItems()
     float rotation = 0.0f;
     glm::vec3 color(1.0f, 1.0f, 1.0f);
 
-    Renderer_Items->BatchDraw(position, scale, rotation, color);
+    //std::cout << "Items Object Draw STARTING" << std::endl;
+    Renderer_Items->BatchDraw(position, rotation, scale, color);
+    //std::cout << "Items Object Draw COMPLETE" << std::endl;
 }
 
 void Engine::DrawDynamic()
@@ -151,7 +153,9 @@ void Engine::DrawDynamic()
     float rotation = 0.0f;
     glm::vec3 color(1.0f, 1.0f, 1.0f);
 
-    Renderer_Dynamic->BatchDraw(position, scale, rotation, color);
+    //std::cout << "Dynamic Object Draw STARTING" << std::endl;
+    Renderer_Dynamic->BatchDraw(position, rotation, scale, color);
+    //std::cout << "Dynamic Object Draw COMPLETE" << std::endl;
 }
 
 void Engine::DrawPlayer()
@@ -161,7 +165,9 @@ void Engine::DrawPlayer()
     float rotation = 0.0f;
     glm::vec3 color(1.0f, 1.0f, 1.0f);
 
-    Renderer_Player->BatchDraw(position, scale, rotation, color);
+    //std::cout << "Player Object Draw STARTING" << std::endl;
+    Renderer_Player->BatchDraw(position, rotation, scale, color);
+    //std::cout << "Player Object Draw COMPLETE" << std::endl;
 }
 
 void Engine::DrawUI()
@@ -171,7 +177,21 @@ void Engine::DrawUI()
     float rotation = 0.0f;
     glm::vec3 color(1.0f, 1.0f, 1.0f);
 
-    Text->RenderText("ROGUE HACK!", Width * -0.08f, Height * 0.45f, 1.0f);
+    //Text->RenderText("ROGUE HACK!", Width * -0.08f, Height * 0.45f, 1.0f);
+
+    //std::cout << "UI Object Draw STARTING" << std::endl;
+    Renderer_UI->BatchDraw(position, rotation, scale, color);
+    /*
+    for (int i = 0; i < UIObjects.size(); ++i)
+    {
+        UIObjects[i].Draw(*Renderer_Sprite);
+    }
+    */
+    for (int i = 0; i < UIText.size(); ++i)
+    {
+        Renderer_Text->RenderText(UIText[i]);
+    }
+    //std::cout << "UI Object Draw COMPLETE" << std::endl;
 }
 
 void Engine::InitPerformanceMetrics()
@@ -204,6 +224,6 @@ void Engine::PerformanceMetrics()
     }
 
     // draw UI
-    Text->RenderText("FPS: " + std::to_string(fps), Width * -0.45f, Height * 0.45f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-    Text->RenderText("Frametime: " + std::to_string(frameTime), Width * -0.45f, Height * 0.4f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    Renderer_Text->RenderText("FPS: " + std::to_string(fps), Width * -0.45f, Height * 0.45f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    Renderer_Text->RenderText("Frametime: " + std::to_string(frameTime), Width * -0.45f, Height * 0.4f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 }

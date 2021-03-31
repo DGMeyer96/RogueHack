@@ -28,6 +28,7 @@ std::vector<GameObject> StaticObjects;
 std::vector<GameObject> DynamicObjects;
 std::vector<GameObject> ItemObjects;
 std::vector<GameObject> PlayerObjects;
+std::vector<GameObject> UIObjects;
 std::vector<Text> TextObjects;
 
 Game::Game(unsigned int width, unsigned int height, Engine* game_engine) 
@@ -118,6 +119,8 @@ void Game::ProcessInput(float deltaTime)
 {
     if (this->State == GAME_MENU)
     {
+        MainMenu();
+
         if (this->Keys[GLFW_KEY_ENTER] && !this->KeysProcessed[GLFW_KEY_ENTER])
         {
             NewGame();
@@ -236,8 +239,31 @@ void Game::MainMenu()
     DynamicObjects = std::vector<GameObject>();
     ItemObjects = std::vector<GameObject>();
     PlayerObjects = std::vector<GameObject>();
+    UIObjects = std::vector<GameObject>();
+    GameEngine->ClearTextObjects();
     
     //Draw Menu Specific Objects
+
+    /*
+    float scale = 1.0f;
+    glm::vec3 color(1.0f, 1.0f, 1.0f);
+    Text title("ROGUE HACK!", glm::vec2(Width * -0.08f, Height * 0.45f), scale, color);
+    */
+
+    glm::vec2 position(0.0f);
+    float rotation = 0.0f;
+    glm::vec2 scale(0.0f);
+
+    GameObject background = GameObject(position, rotation, glm::vec2(48.0f, 72.0f));
+    UIObjects.push_back(background);
+    GameEngine->UpdateUIObjectPool(UIObjects);
+    //GameEngine->AddUIObject(background);
+
+    Text text("ROGUE HACK!", glm::vec2(Width * -0.08f, Height * 0.45f));
+    GameEngine->AddTextObject(text);
+
+    text = Text("Press ENTER to start", glm::vec2(Width * -0.14f, 0.0f));
+    GameEngine->AddTextObject(text);
 }
 
 void Game::PauseGame()
@@ -253,9 +279,11 @@ void Game::NewGame()
     DynamicObjects = std::vector<GameObject>();
     ItemObjects = std::vector<GameObject>();
     PlayerObjects = std::vector<GameObject>();
+    UIObjects = std::vector<GameObject>();
+    GameEngine->ClearTextObjects();
 
     std::cout << "Generating Static Objects" << std::endl;
-    int numObjects = 128;
+    int numObjects = 2;
     GameObject temp;
     int index = 0;
     float offset = 0.0f;
@@ -281,10 +309,22 @@ void Game::NewGame()
     std::cout << "Static Object Generation Done" << std::endl;
     GameEngine->UpdateStaticObjectPool(StaticObjects);
 
+    //GameEngine->UpdateItemObjectPool(ItemObjects);
+    //GameEngine->UpdateDynamicObjectPool(DynamicObjects);
+
     Player_Object = new Player(ResourceManager::GetTexture("hero"));
     PlayerObjects = std::vector<GameObject>();
     PlayerObjects.push_back(*Player_Object);
     GameEngine->UpdatePlayerObjectPool(PlayerObjects);
+
+
+    glm::vec2 position(0.0f);
+    float rotation = 0.0f;
+    glm::vec2 scale(0.0f);
+
+    GameObject ui = GameObject(glm::vec2(0.0f, -8.0f), rotation, glm::vec2(48.0f, 5.0f));
+    UIObjects.push_back(ui);
+    GameEngine->UpdateUIObjectPool(UIObjects);
 }
 
 void Game::LoadGame()

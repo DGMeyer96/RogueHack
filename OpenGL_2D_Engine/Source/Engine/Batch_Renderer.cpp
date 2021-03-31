@@ -35,7 +35,7 @@ void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
     texOffsets.resize(objectsToDraw.size());
     modelMatrices.resize(objectsToDraw.size());
 
-    for (int i = 0; i < objectsToDraw.size(); ++i)
+    for (int i = 0; i < objectsToDraw.size(); i++)
     {
         colors[i] = objectsToDraw[i].Color;
         texOffsets[i] = glm::vec2(objectsToDraw[i].TextureCoordinates.x / (Tilemap.Width / CellDimensions.x), 
@@ -72,7 +72,7 @@ void BatchRenderer::UpdateTransforms(std::vector<GameObject> objectsToDraw)
     std::cout << "Elapsed Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 }
 
-void BatchRenderer::BatchDraw(glm::vec2 position, glm::vec2 size, float rotate, glm::vec3 color)
+void BatchRenderer::BatchDraw(glm::vec2 position, float rotation, glm::vec2 size, glm::vec3 color)
 {
     position.y *= -1.0f;    // +Y = UP and -Y = DOWN
     // prepare transformations
@@ -84,7 +84,7 @@ void BatchRenderer::BatchDraw(glm::vec2 position, glm::vec2 size, float rotate, 
     // Note: Order is from Left to Right so Transform order of operations is in reverse order
     // This makes the sprite's origin at the center instead of the top-left
     camera = glm::translate(camera, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f));   // Move origin back to top left
-    camera = glm::rotate(camera, glm::radians(rotate), glm::vec3(0.0f, 0.0f, 1.0f));  // Rotate object
+    camera = glm::rotate(camera, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));  // rotation object
     camera = glm::translate(camera, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); // Move origin from top left, to center for correct rotations
 
     camera = glm::scale(camera, glm::vec3(size, 1.0f));   // (1,1) scale is now a fixed world scale, regardless of resolution / aspect
@@ -151,7 +151,7 @@ void BatchRenderer::InitRenderData()
     unsigned int instanceVBO_Color;
     glGenBuffers(1, &instanceVBO_Color);
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO_Color);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * colors.size(), &colors[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * colors.size(), &colors[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 1);
 
     glEnableVertexAttribArray(5);
@@ -175,6 +175,8 @@ void BatchRenderer::InitRenderData()
 
 glm::mat4 BatchRenderer::UpdateModelMatrix(GameObject object)
 {
+    object.Position.y *= -1.0f; // Make +Y up and -Y down
+
     glm::mat4 model = glm::mat4(1.0f);
 
     model = glm::translate(model, glm::vec3(World_Origin + ((object.Position - Camera_Position) * World_Unit), 0.0f));   // Make (0,0) center of the screen

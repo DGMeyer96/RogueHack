@@ -39,27 +39,52 @@ const float WORLD_SCALE = 0.05f;
 
 class Engine
 {
-public:
-    unsigned int            Width, Height;
-    bool bDrawPerformanceMetrics;
+private:
+    float WORLD_UNIT;
+
+    const std::string Engine_Shader_Path = "./Shaders/Engine/";
+    const std::string Shader_Path = "./Shaders/";
+    const std::string Texture_Path = "./Assets/Textures/";
 
     // Engine-related State data
-    SpriteRenderer* Renderer;
+    SpriteRenderer* Renderer_Sprite;
     TilemapRenderer* TRenderer;
     BatchRenderer* Renderer_Static;
     BatchRenderer* Renderer_Dynamic;
     BatchRenderer* Renderer_Items;
     BatchRenderer* Renderer_Player;
+    BatchRenderer* Renderer_UI;
     ParticleGenerator* Particles;
     PostProcessor* Effects;
     ISoundEngine* SoundEngine = createIrrKlangDevice();
-    TextRenderer* Text;
+    TextRenderer* Renderer_Text;
+
+    std::vector<GameObject> UIObjects;
+    std::vector<Text> UIText;
+
+    // Render Layers
+    void DrawStatic();
+    void DrawItems();
+    void DrawDynamic();
+    void DrawPlayer();
+    void DrawUI();
+
+    // Performance Metric
+    double lastTime;
+    int numFrames;
+    float frameTime, fps;
+    void InitPerformanceMetrics();
+    void PerformanceMetrics();
+
+public:
+    unsigned int            Width, Height;
+    bool bDrawPerformanceMetrics;
 
     // constructor/destructor
     Engine(unsigned int width, unsigned int height);
     ~Engine();
 
-    void DrawOnScreenMessage(std::string message) { Text->RenderText(message, -400.0f, -300.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f)); }
+    void DrawOnScreenMessage(std::string message) { Renderer_Text->RenderText(message, -400.0f, -300.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f)); }
 
     // initialize Engine (load all shaders/textures)
     void Init();
@@ -78,27 +103,12 @@ public:
     void UpdateItemObjectPool(std::vector<GameObject> objects) { Renderer_Items->SetRenderData(objects); }
     void UpdateDynamicObjectPool(std::vector<GameObject> objects) { Renderer_Dynamic->SetRenderData(objects); }
     void UpdatePlayerObjectPool(std::vector<GameObject> objects) { Renderer_Player->SetRenderData(objects); }
+    void UpdateUIObjectPool(std::vector<GameObject> objects) { Renderer_UI->SetRenderData(objects); }
 
-private:
-    float WORLD_UNIT;
-
-    const std::string Engine_Shader_Path = "./Shaders/Engine/";
-    const std::string Shader_Path = "./Shaders/";
-    const std::string Texture_Path = "./Assets/Textures/";
-
-    // Render Layers
-    void DrawStatic();
-    void DrawItems();   
-    void DrawDynamic();
-    void DrawPlayer();
-    void DrawUI();
-
-    // Performance Metric
-    double lastTime;
-    int numFrames;
-    float frameTime, fps;
-    void InitPerformanceMetrics();
-    void PerformanceMetrics();
+    void AddTextObject(Text text) { UIText.push_back(text); }
+    void ClearTextObjects() { UIText = std::vector<Text>(); }
+    void AddUIObject(GameObject object) { UIObjects.push_back(object); }
+    void ClearUIObject() { UIObjects = std::vector<GameObject>(); }
 };
 
 

@@ -40,7 +40,7 @@ public:
 
     void UpdateTransforms(std::vector<GameObject> objectsToDraw);
 
-    void BatchDraw(glm::vec2 position, glm::vec2 size = glm::vec2(1.0f, 1.0f), float rotate = 0.0f,
+    void BatchDraw(glm::vec2 position, float rotation = 0.0f, glm::vec2 size = glm::vec2(1.0f, 1.0f),
         glm::vec3 color = glm::vec3(1.0f));
 
     void UpdateCameraPosition(glm::vec2 cameraPos) { Camera_Position = cameraPos; }

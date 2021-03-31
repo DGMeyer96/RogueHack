@@ -13,7 +13,7 @@ public:
 	float Scale;
 	glm::vec3 Color;
 
-	Text(std::string str, glm::vec2 pos, float scale, glm::vec3 color)
+	Text(std::string str, glm::vec2 pos, float scale = 1.0f, glm::vec3 color = glm::vec3(1.0f))
 		: String(str), Position(pos), Scale(scale), Color(color) { };
 };
 
