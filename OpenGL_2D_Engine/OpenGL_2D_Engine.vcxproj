@@ -169,6 +169,7 @@
   <ItemGroup>
     <ClInclude Include="Source\Enemy.h" />
     <ClInclude Include="Source\Engine\Batch_Renderer.h" />
+    <ClInclude Include="Source\Engine\Color.h" />
     <ClInclude Include="Source\Engine\Engine.h" />
     <ClInclude Include="Source\Engine\Game_Math.h" />
     <ClInclude Include="Source\Engine\Game_Object.h" />

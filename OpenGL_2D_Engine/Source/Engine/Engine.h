@@ -20,6 +20,7 @@
 #include "Text_Renderer.h"
 #include "Timer.h"
 #include "Text.h"
+#include "Color.h"
 // Audio Engine
 #include <irrklang/irrKlang.h>
 using namespace irrklang;

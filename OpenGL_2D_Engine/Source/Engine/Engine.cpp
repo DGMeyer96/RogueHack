@@ -69,12 +69,18 @@ void Engine::Init()
 
     // load textures
     ResourceManager::LoadTexture("./Assets/Textures/background.jpg", false, "background");
-    ResourceManager::LoadTexture("./Assets/Textures/SpriteSheet/1Bit_SpriteSheet.png", true, "spriteSheet");
+    ResourceManager::LoadTexture("./Assets/Textures/SpriteSheets/1Bit_SpriteSheet.png", true, "spriteSheet");
     ResourceManager::LoadTexture("./Assets/Textures/floppydisk.png", true, "test");
     ResourceManager::LoadTexture("./Assets/Textures/hero.gif", true, "hero");
     ResourceManager::LoadTexture("./Assets/Textures/enemy.gif", true, "enemy");
     ResourceManager::LoadTexture("./Assets/Textures/chest.png", true, "chest");
     ResourceManager::LoadTexture("./Assets/Textures/block.png", false, "block");
+
+    ResourceManager::LoadTexture("./Assets/Textures/Palettes/Apple2.png", false, "apple2");
+    ResourceManager::LoadTexture("./Assets/Textures/Palettes/CGA.png", false, "cga");
+    ResourceManager::LoadTexture("./Assets/Textures/Palettes/Win16.png", false, "win16");
+
+    ResourceManager::LoadTexture("./Assets/Textures/SpriteSheets/UI-Borders.png", true, "ui-borders");
 
     //TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 
@@ -82,7 +88,7 @@ void Engine::Init()
     Renderer_Dynamic = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("enemy"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
     Renderer_Items = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("chest"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
     Renderer_Player = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("hero"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
-    Renderer_UI = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("background"), glm::vec2(1600.0f, 900.0f), Width, Height, WORLD_UNIT);
+    Renderer_UI = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("ui-borders"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 
     // Initalize random seed
     srand(time(NULL));

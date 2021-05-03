@@ -254,10 +254,11 @@ void Game::MainMenu()
     float rotation = 0.0f;
     glm::vec2 scale(0.0f);
 
-    GameObject background = GameObject(position, rotation, glm::vec2(48.0f, 72.0f));
-    UIObjects.push_back(background);
-    GameEngine->UpdateUIObjectPool(UIObjects);
+    //GameObject background = GameObject(position, rotation, glm::vec2(48.0f, 72.0f));
+    //UIObjects.push_back(background);
+    //GameEngine->UpdateUIObjectPool(UIObjects);
     //GameEngine->AddUIObject(background);
+
 
     Text text("ROGUE HACK!", glm::vec2(Width * -0.08f, Height * 0.45f));
     GameEngine->AddTextObject(text);
@@ -320,10 +321,60 @@ void Game::NewGame()
 
     glm::vec2 position(0.0f);
     float rotation = 0.0f;
-    glm::vec2 scale(0.0f);
+    glm::vec2 scale(1.0f);
 
-    GameObject ui = GameObject(glm::vec2(0.0f, -8.0f), rotation, glm::vec2(48.0f, 5.0f));
+    GameObject ui;
+
+    
+    for (int x = -16; x <= 16; ++x)
+    {
+        // Top Border
+        position.x = (float)x;
+        position.y = -4.0f;
+        ui = GameObject(position, rotation, scale, glm::vec2(1.0f, 0.0f), Color::white());
+        UIObjects.push_back(ui);
+        // Bottom Border
+        position.y = -9.0f;
+        ui = GameObject(position, rotation, scale, glm::vec2(1.0f, 2.0f), Color::white());
+        UIObjects.push_back(ui);
+    }
+
+    for (int y = -8; y <= -5; ++y)
+    {
+        // Left Border
+        position.x = -17.0f;
+        position.y = (float)y;
+        ui = GameObject(position, rotation, scale, glm::vec2(0.0f, 1.0f), Color::white());
+        UIObjects.push_back(ui);
+        // Right Border
+        position.x = 17.0f;
+        ui = GameObject(position, rotation, scale, glm::vec2(2.0f, 1.0f), Color::white());
+        UIObjects.push_back(ui);
+    }
+
+    // Top Left
+    position.x = -17.0f;
+    position.y = -4.0f;
+    ui = GameObject(position, rotation, scale, glm::vec2(0.0f, 0.0f), Color::white());
     UIObjects.push_back(ui);
+    // Top Right
+    position.x = 17.0f;
+    position.y = -4.0f;
+    ui = GameObject(position, rotation, scale, glm::vec2(2.0f, 0.0f), Color::white());
+    UIObjects.push_back(ui);
+    // Bottom Left
+    position.x = -17.0f;
+    position.y = -9.0f;
+    ui = GameObject(position, rotation, scale, glm::vec2(0.0f, 2.0f), Color::white());
+    UIObjects.push_back(ui);
+    // Bottom Right
+    position.x = 17.0f;
+    position.y = -9.0f;
+    ui = GameObject(position, rotation, scale, glm::vec2(2.0f, 2.0f), Color::white());
+    UIObjects.push_back(ui);
+
+    //ui = GameObject(glm::vec2(0.0f, -6.0f), rotation, scale, glm::vec2(0.0f, 0.0f), Color::white());
+    //UIObjects.push_back(ui);
     GameEngine->UpdateUIObjectPool(UIObjects);
 }
 
