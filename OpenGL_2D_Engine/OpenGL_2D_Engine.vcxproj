@@ -156,6 +156,7 @@
     <ClCompile Include="Source\Engine\Resource_Manager.cpp" />
     <ClCompile Include="Source\Engine\Shader.cpp" />
     <ClCompile Include="Source\Engine\Sprite_Renderer.cpp" />
+    <ClCompile Include="Source\Engine\Text.cpp" />
     <ClCompile Include="Source\Engine\Texture.cpp" />
     <ClCompile Include="Source\Engine\Text_Renderer.cpp" />
     <ClCompile Include="Source\Engine\Tilemap_Renderer.cpp" />

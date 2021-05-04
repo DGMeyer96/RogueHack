@@ -35,12 +35,15 @@ public:
 	BatchRenderer(Shader shader, Texture2D tilemap, glm::vec2 cellSize, unsigned int screen_width, unsigned int screen_height, float world_unit);
 	~BatchRenderer();
 
-    void SetRenderData(std::vector<GameObject> objectsToDraw);
+    void SetRenderData(std::vector<GameObject> objectsToDraw, bool bUseScreenCoordinates);
     void SetTilemap(Texture2D tilemap, glm::vec2 cellSize);
 
     void UpdateTransforms(std::vector<GameObject> objectsToDraw);
+    void UpdateTransforms_Unscaled(std::vector<GameObject> objectsToDraw);
 
-    void BatchDraw(glm::vec2 position, float rotation = 0.0f, glm::vec2 size = glm::vec2(1.0f, 1.0f),
+    void BatchDraw(glm::vec2 position, float rotation = 0.0f, glm::vec2 size = glm::vec2(1.0f, 1.0f),   //Draw in World-Coordinates
+        glm::vec3 color = glm::vec3(1.0f));
+    void BatchDraw_Unscaled(glm::vec2 position, float rotation = 0.0f, glm::vec2 size = glm::vec2(1.0f, 1.0f),  // Draw in Pixel-Coordinates, used for UI
         glm::vec3 color = glm::vec3(1.0f));
 
     void UpdateCameraPosition(glm::vec2 cameraPos) { Camera_Position = cameraPos; }
@@ -64,6 +67,7 @@ private:
 
 	void InitRenderData();
     glm::mat4 UpdateModelMatrix(GameObject object);
+    glm::mat4 UpdateModelMatrix_Unscaled(GameObject object);
 };
 
 

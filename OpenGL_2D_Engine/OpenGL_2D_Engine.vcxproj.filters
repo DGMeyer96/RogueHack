@@ -155,6 +155,9 @@
     <ClCompile Include="Source\Engine\Engine.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Engine\Basic.frag">

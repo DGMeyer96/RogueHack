@@ -27,7 +27,7 @@ BatchRenderer::~BatchRenderer()
     modelMatrices = std::vector<glm::mat4>();
 }
 
-void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
+void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw, bool bUseScreenCoordinates)
 {
     //std::cout << "Setting Render Data of size: " << objectsToDraw.size() << std::endl;
 
@@ -35,12 +35,25 @@ void BatchRenderer::SetRenderData(std::vector<GameObject> objectsToDraw)
     texOffsets.resize(objectsToDraw.size());
     modelMatrices.resize(objectsToDraw.size());
 
-    for (int i = 0; i < objectsToDraw.size(); i++)
+    if (bUseScreenCoordinates)  // Used primarily for UI
     {
-        colors[i] = objectsToDraw[i].Color;
-        texOffsets[i] = glm::vec2(objectsToDraw[i].TextureCoordinates.x / (Tilemap.Width / CellDimensions.x), 
-                                objectsToDraw[i].TextureCoordinates.y / (Tilemap.Height / CellDimensions.y));
-        modelMatrices[i] = UpdateModelMatrix(objectsToDraw[i]);
+        for (int i = 0; i < objectsToDraw.size(); i++)
+        {
+            colors[i] = objectsToDraw[i].Color;
+            texOffsets[i] = glm::vec2(objectsToDraw[i].TextureCoordinates.x / (Tilemap.Width / CellDimensions.x),
+                objectsToDraw[i].TextureCoordinates.y / (Tilemap.Height / CellDimensions.y));
+            modelMatrices[i] = UpdateModelMatrix_Unscaled(objectsToDraw[i]);
+        }
+    }
+    else    // Used by game objects
+    {
+        for (int i = 0; i < objectsToDraw.size(); i++)
+        {
+            colors[i] = objectsToDraw[i].Color;
+            texOffsets[i] = glm::vec2(objectsToDraw[i].TextureCoordinates.x / (Tilemap.Width / CellDimensions.x),
+                objectsToDraw[i].TextureCoordinates.y / (Tilemap.Height / CellDimensions.y));
+            modelMatrices[i] = UpdateModelMatrix(objectsToDraw[i]);
+        }
     }
 
     //std::cout << "Initializing Render Data" << std::endl;
@@ -72,6 +85,22 @@ void BatchRenderer::UpdateTransforms(std::vector<GameObject> objectsToDraw)
     std::cout << "Elapsed Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 }
 
+void BatchRenderer::UpdateTransforms_Unscaled(std::vector<GameObject> objectsToDraw)
+{
+    std::chrono::steady_clock::time_point start, end;
+    std::cout << "Batch Renderer Transform Update" << std::endl;
+    start = std::chrono::steady_clock::now();
+
+    modelMatrices.resize(objectsToDraw.size());
+    for (int i = 0; i < objectsToDraw.size(); ++i)
+    {
+        modelMatrices[i] = UpdateModelMatrix_Unscaled(objectsToDraw[i]);
+    }
+
+    end = std::chrono::steady_clock::now();
+    std::cout << "Elapsed Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+}
+
 void BatchRenderer::BatchDraw(glm::vec2 position, float rotation, glm::vec2 size, glm::vec3 color)
 {
     position.y *= -1.0f;    // +Y = UP and -Y = DOWN
@@ -96,6 +125,36 @@ void BatchRenderer::BatchDraw(glm::vec2 position, float rotation, glm::vec2 size
     glActiveTexture(GL_TEXTURE0);
     Tilemap.Bind();
     
+    // draw instanced quads
+    glBindVertexArray(this->quadVAO);
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, modelMatrices.size()); // 100 triangles of 6 vertices each
+    glBindVertexArray(0);
+}
+
+void BatchRenderer::BatchDraw_Unscaled(glm::vec2 position, float rotation, glm::vec2 size, glm::vec3 color)
+{
+    position.y *= -1.0f;    // +Y = UP and -Y = DOWN
+    // prepare transformations
+    this->shader.Use();
+
+    glm::mat4 camera = glm::mat4(1.0f);
+    camera = glm::translate(camera, glm::vec3(position - Camera_Position, 0.0f));   // Make (0,0) center of the screen
+
+    // Note: Order is from Left to Right so Transform order of operations is in reverse order
+    // This makes the sprite's origin at the center instead of the top-left
+    camera = glm::translate(camera, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.0f));   // Move origin back to top left
+    camera = glm::rotate(camera, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));  // rotation object
+    camera = glm::translate(camera, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.0f)); // Move origin from top left, to center for correct rotations
+
+    camera = glm::scale(camera, glm::vec3(size, 1.0f));   // (1,1) scale is now a fixed world scale, regardless of resolution / aspect
+
+    shader.SetMatrix4("camera", camera);
+
+    //std::cout << "Batch Draw" << std::endl;
+
+    glActiveTexture(GL_TEXTURE0);
+    Tilemap.Bind();
+
     // draw instanced quads
     glBindVertexArray(this->quadVAO);
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, modelMatrices.size()); // 100 triangles of 6 vertices each
@@ -180,6 +239,23 @@ glm::mat4 BatchRenderer::UpdateModelMatrix(GameObject object)
     glm::mat4 model = glm::mat4(1.0f);
 
     model = glm::translate(model, glm::vec3(World_Origin + ((object.Position - Camera_Position) * World_Unit), 0.0f));   // Make (0,0) center of the screen
+    // Note: Order is from Left to Right so Transform order of operations is in reverse order
+    // This makes the sprite's origin at the center instead of the top-left
+    model = glm::translate(model, glm::vec3(0.5f * object.Scale.x, 0.5f * object.Scale.y, 0.0f));   // Move origin back to top left
+    model = glm::rotate(model, glm::radians(object.Rotation), glm::vec3(0.0f, 0.0f, 1.0f));  // Rotate object
+    model = glm::translate(model, glm::vec3(-0.5f * object.Scale.x, -0.5f * object.Scale.y, 0.0f)); // Move origin from top left, to center for correct rotations
+    model = glm::scale(model, glm::vec3(object.Scale * World_Unit, 1.0f));   // (1,1) scale is now a fixed world scale, regardless of resolution / aspect
+
+    return model;
+}
+
+glm::mat4 BatchRenderer::UpdateModelMatrix_Unscaled(GameObject object)
+{
+    object.Position.y *= -1.0f; // Make +Y up and -Y down
+
+    glm::mat4 model = glm::mat4(1.0f);
+
+    model = glm::translate(model, glm::vec3(World_Origin + (object.Position - Camera_Position), 0.0f));   // Make (0,0) center of the screen
     // Note: Order is from Left to Right so Transform order of operations is in reverse order
     // This makes the sprite's origin at the center instead of the top-left
     model = glm::translate(model, glm::vec3(0.5f * object.Scale.x, 0.5f * object.Scale.y, 0.0f));   // Move origin back to top left

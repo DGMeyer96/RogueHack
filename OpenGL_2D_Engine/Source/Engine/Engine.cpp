@@ -81,6 +81,7 @@ void Engine::Init()
     ResourceManager::LoadTexture("./Assets/Textures/Palettes/Win16.png", false, "win16");
 
     ResourceManager::LoadTexture("./Assets/Textures/SpriteSheets/UI-Borders.png", true, "ui-borders");
+    ResourceManager::LoadTexture("./Assets/Textures/Sprites/UI/Border.png", false, "border");
 
     //TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 
@@ -186,7 +187,7 @@ void Engine::DrawUI()
     //Text->RenderText("ROGUE HACK!", Width * -0.08f, Height * 0.45f, 1.0f);
 
     //std::cout << "UI Object Draw STARTING" << std::endl;
-    Renderer_UI->BatchDraw(position, rotation, scale, color);
+    Renderer_UI->BatchDraw_Unscaled(position, rotation, scale, color);
     /*
     for (int i = 0; i < UIObjects.size(); ++i)
     {

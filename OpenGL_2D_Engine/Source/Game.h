@@ -71,6 +71,8 @@ public:
     void ResetLevel();
     void ResetPlayer();
 
+    void GameUI();
+
 private:
     Engine* GameEngine;
     //float WORLD_UNIT;

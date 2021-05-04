@@ -100,11 +100,11 @@ public:
     void UpdateCamera(glm::vec2 player_pos, float deltaTime);
 
     // Update Render Layer data
-    void UpdateStaticObjectPool(std::vector<GameObject> objects) { Renderer_Static->SetRenderData(objects); }
-    void UpdateItemObjectPool(std::vector<GameObject> objects) { Renderer_Items->SetRenderData(objects); }
-    void UpdateDynamicObjectPool(std::vector<GameObject> objects) { Renderer_Dynamic->SetRenderData(objects); }
-    void UpdatePlayerObjectPool(std::vector<GameObject> objects) { Renderer_Player->SetRenderData(objects); }
-    void UpdateUIObjectPool(std::vector<GameObject> objects) { Renderer_UI->SetRenderData(objects); }
+    void UpdateStaticObjectPool(std::vector<GameObject> objects) { Renderer_Static->SetRenderData(objects, false); }
+    void UpdateItemObjectPool(std::vector<GameObject> objects) { Renderer_Items->SetRenderData(objects, false); }
+    void UpdateDynamicObjectPool(std::vector<GameObject> objects) { Renderer_Dynamic->SetRenderData(objects, false); }
+    void UpdatePlayerObjectPool(std::vector<GameObject> objects) { Renderer_Player->SetRenderData(objects, false); }
+    void UpdateUIObjectPool(std::vector<GameObject> objects) { Renderer_UI->SetRenderData(objects, true); }
 
     void AddTextObject(Text text) { UIText.push_back(text); }
     void ClearTextObjects() { UIText = std::vector<Text>(); }
