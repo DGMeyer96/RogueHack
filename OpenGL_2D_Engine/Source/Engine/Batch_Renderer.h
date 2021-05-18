@@ -49,6 +49,8 @@ public:
     void UpdateCameraPosition(glm::vec2 cameraPos) { Camera_Position = cameraPos; }
     glm::vec2 GetCameraPosition() { return Camera_Position; }
 
+    void UpdateWorldUnit(float worldUnit) { World_Unit = worldUnit; }
+
 private:
     Shader       shader;
     Texture2D    Tilemap;

@@ -76,16 +76,17 @@ void Engine::Init()
     ResourceManager::LoadTexture("./Assets/Textures/chest.png", true, "chest");
     ResourceManager::LoadTexture("./Assets/Textures/block.png", false, "block");
 
-    ResourceManager::LoadTexture("./Assets/Textures/Palettes/Apple2.png", false, "apple2");
-    ResourceManager::LoadTexture("./Assets/Textures/Palettes/CGA.png", false, "cga");
-    ResourceManager::LoadTexture("./Assets/Textures/Palettes/Win16.png", false, "win16");
+    ResourceManager::LoadTexture("./Assets/Textures/Palettes/Apple2.png", true, "apple2");
+    ResourceManager::LoadTexture("./Assets/Textures/Palettes/CGA.png", true, "cga");
+    ResourceManager::LoadTexture("./Assets/Textures/Palettes/Win16.png", true, "win16");
 
     ResourceManager::LoadTexture("./Assets/Textures/SpriteSheets/UI-Borders.png", true, "ui-borders");
     ResourceManager::LoadTexture("./Assets/Textures/Sprites/UI/Border.png", false, "border");
 
     //TRenderer = new TilemapRenderer(ResourceManager::GetShader("tile"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
 
-    Renderer_Static = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
+    //Renderer_Static = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("spriteSheet"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
+    Renderer_Static = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("cga"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
     Renderer_Dynamic = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("enemy"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
     Renderer_Items = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("chest"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
     Renderer_Player = new BatchRenderer(ResourceManager::GetShader("batch"), ResourceManager::GetTexture("hero"), glm::vec2(16.0f, 16.0f), Width, Height, WORLD_UNIT);
@@ -121,12 +122,20 @@ bool Engine::CheckCollision(GameObject& one, GameObject& two)   // AABB - AABB c
     return collisionX && collisionY;
 }
 
-void Engine::UpdateCamera(glm::vec2 player_pos, float time)
+void Engine::UpdateCameraPosition(glm::vec2 player_pos, float time)
 {
     // Smooth Lerp Camera
     Renderer_Static->UpdateCameraPosition(GameMath::Lerp(Renderer_Static->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), time));
     Renderer_Items->UpdateCameraPosition(GameMath::Lerp(Renderer_Items->GetCameraPosition(), glm::vec2(player_pos.x, -player_pos.y), time));
     Renderer_Dynamic->UpdateCameraPosition(glm::vec2(player_pos.x, -player_pos.y));
+}
+
+void Engine::UpdateCameraZoom(float zoom)
+{
+    Renderer_Player->UpdateWorldUnit(WORLD_UNIT * zoom);
+    Renderer_Static->UpdateWorldUnit(WORLD_UNIT * zoom);
+    Renderer_Items->UpdateWorldUnit(WORLD_UNIT * zoom);
+    Renderer_Dynamic->UpdateWorldUnit(WORLD_UNIT * zoom);
 }
 
 void Engine::DrawStatic()

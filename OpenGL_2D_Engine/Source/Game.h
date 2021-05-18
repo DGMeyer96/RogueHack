@@ -44,6 +44,9 @@ public:
     unsigned int            Width, Height;
     std::vector<GameLevel>  Levels;
     unsigned int            Level;
+    
+    // Camera
+    float                   CameraZoom = 1.0f;
 
     // constructor/destructor
     Game(unsigned int width, unsigned int height, Engine* game_engine);
@@ -72,6 +75,10 @@ public:
     void ResetPlayer();
 
     void GameUI();
+
+    // Overworld
+    void GenerateOverworld(int size);
+    void LoadOverworld();
 
 private:
     Engine* GameEngine;

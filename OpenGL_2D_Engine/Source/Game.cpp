@@ -21,8 +21,9 @@ float ShakeTime = 0.0f;
 // Player
 Player* Player_Object;
 
-static const int MAP_SIZE = 1000;
-std::vector<std::vector<float>> PerlinNoiseMap(MAP_SIZE, std::vector<float>(MAP_SIZE));
+//static const int MAP_SIZE = 1000;
+//std::vector<std::vector<float>> PerlinNoiseMap(MAP_SIZE, std::vector<float>(MAP_SIZE));
+std::vector<std::vector<float>> PerlinNoiseMap;
 
 std::vector<GameObject> StaticObjects;
 std::vector<GameObject> DynamicObjects;
@@ -108,9 +109,7 @@ void Game::Update(float deltaTime)
     if (this->State == GAME_ACTIVE)
     {
         GameEngine->UpdatePlayerObjectPool(PlayerObjects);
-        GameEngine->UpdateCamera(Player_Object->Position, deltaTime * 5.0f);
-
-        
+        GameEngine->UpdateCameraPosition(Player_Object->Position, deltaTime * 5.0f);
     }
         
 }
@@ -204,6 +203,7 @@ void Game::ProcessInput(float deltaTime)
         }
     }
 
+    // Toggle Performance Metrics
     if (this->Keys[GLFW_KEY_P] && !this->KeysProcessed[GLFW_KEY_P])
     {
         this->KeysProcessed[GLFW_KEY_P] = true;
@@ -212,6 +212,37 @@ void Game::ProcessInput(float deltaTime)
             GameEngine->bDrawPerformanceMetrics = false;
         else
             GameEngine->bDrawPerformanceMetrics = true;
+    }
+
+    // Zoom Camera In
+    if (this->Keys[GLFW_KEY_LEFT_BRACKET] && !this->KeysProcessed[GLFW_KEY_LEFT_BRACKET])
+    {
+        this->KeysProcessed[GLFW_KEY_LEFT_BRACKET] = true;
+
+        if (CameraZoom == 0.25f)
+            CameraZoom = 1.0f;
+        else if (CameraZoom == 1.0f)
+            CameraZoom = 2.0f;
+
+        std::cout << "ZOOM IN - " << CameraZoom << std::endl;
+        GameEngine->UpdateCameraZoom(CameraZoom);
+        GameEngine->UpdateStaticObjectPool(StaticObjects);
+        
+    }
+    // Zoom Camera Out
+    else if (this->Keys[GLFW_KEY_RIGHT_BRACKET] && !this->KeysProcessed[GLFW_KEY_RIGHT_BRACKET])
+    {
+        this->KeysProcessed[GLFW_KEY_RIGHT_BRACKET] = true;
+
+        if (CameraZoom == 2.0f)
+            CameraZoom = 1.0f;
+        else if(CameraZoom == 1.0f)
+            CameraZoom = 0.25f;
+
+        std::cout << "ZOOM OUT - " << CameraZoom << std::endl;
+        GameEngine->UpdateCameraZoom(CameraZoom);
+        GameEngine->UpdateStaticObjectPool(StaticObjects);
+        
     }
 }
 
@@ -283,39 +314,23 @@ void Game::NewGame()
     UIObjects = std::vector<GameObject>();
     GameEngine->ClearTextObjects();
 
-    std::cout << "Generating Static Objects" << std::endl;
-    int numObjects = 128;
-    GameObject temp;
-    int index = 0;
-    float offset = 0.0f;
-    for (int y = -numObjects; y < numObjects; ++y)
-    {
-        for (int x = -numObjects; x < numObjects; ++x)
-        {
-            glm::vec2 translation;
-            translation.x = (float)x + offset;
-            translation.y = (float)y + offset;
+    int smallOverworld = 32;
+    int mediumOverworld = 64;
+    int largeOverworld = 128;
+    GenerateOverworld(smallOverworld);
 
-            float rotation = 0.0f;
-            glm::vec2 scale = glm::vec2(1.0f, 1.0f);
-
-            glm::vec3 color(((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)));
-            glm::vec2 texCoords(((float)rand() / (RAND_MAX)) * 10.0f, ((float)rand() / (RAND_MAX)) * 10.0f);
-
-            //temp = GameObject(translation, 0.0f, glm::vec2(1.0f, 1.0f), ResourceManager::GetTexture("block"), color, glm::vec2(0.0f, 0.0f));
-            temp = GameObject(translation, rotation, scale, texCoords, glm::vec3(1.0f, 1.0f, 1.0f));
-            StaticObjects.push_back(temp);
-        }
-    }
-    std::cout << "Static Object Generation Done" << std::endl;
+    std::cout << "STATIC UPDATE" << std::endl;
     GameEngine->UpdateStaticObjectPool(StaticObjects);
-
-    //GameEngine->UpdateItemObjectPool(ItemObjects);
-    //GameEngine->UpdateDynamicObjectPool(DynamicObjects);
-
+    /*
+    std::cout << "ITEM UPDATE" << std::endl;
+    GameEngine->UpdateItemObjectPool(ItemObjects);
+    std::cout << "DYNAMIC UPDATE" << std::endl;
+    GameEngine->UpdateDynamicObjectPool(DynamicObjects);
+    */
     Player_Object = new Player(ResourceManager::GetTexture("hero"));
     PlayerObjects = std::vector<GameObject>();
     PlayerObjects.push_back(*Player_Object);
+    std::cout << "PLAYER UPDATE" << std::endl;
     GameEngine->UpdatePlayerObjectPool(PlayerObjects);
 
     GameUI();
@@ -446,4 +461,104 @@ void Game::GameUI()
     position = glm::vec2(Width * -0.12f, Height * -0.375f);
     Text titleText = Text("ROGUE HACK", position, 1.5f, Color::white());
     GameEngine->AddTextObject(titleText);
+}
+
+void Game::GenerateOverworld(int size)
+{
+    std::cout << "Generating Overworld" << std::endl;
+    
+    //PerlinNoiseMap.resize((size * 2) * (size * 2));
+
+    GameObject temp;
+    int index = 0;
+    float offset = 0.0f;
+
+    float min = 1.0f;
+    float max = 0.0f;
+
+    // Test implementation for STB perlin noise 
+    //std::cout << "STB Noise Test" << std::endl;
+    Timer t;
+    t.StartTimer();
+    float noiseVal;
+    for (int x = -size; x < size; ++x)
+    {
+        for (int y = -size; y < size; ++y)
+        {
+            // Using '0' to specify "Don't care" for wrap 
+            //noiseVal = stb_perlin_noise3(((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)), 0, 0, 0);
+
+            int octaves = 6;        // number of "octaves" of noise3() to sum
+            float lacunarity = 2.0f;// spacing between successive octaves (use exactly 2.0 for wrapping output)
+            float gain = 0.5f;      // relative weighting applied to each successive octave (think of this as scale, 0.5f produces 0.1f -> 0.9f
+            float offset = 1.0f;    // used to invert the ridges, may need to be larger, not sure
+
+            
+            // Ridge Fractal Perlin Noise (Range = 0 -> 1)
+            noiseVal = stb_perlin_ridge_noise3(((float)rand() / (RAND_MAX)),
+                                                ((float)rand() / (RAND_MAX)),
+                                                ((float)rand() / (RAND_MAX)),
+                                                lacunarity, gain, offset, octaves);
+            
+            std::cout << noiseVal << std::endl;
+
+            if (noiseVal > max)
+            {
+                max = noiseVal;
+            }
+            else if (noiseVal < min)
+            {
+                min = noiseVal;
+            }
+
+            glm::vec2 translation;
+            translation.x = (float)x + offset;
+            translation.y = (float)y + offset;
+
+            float rotation = 0.0f;
+            glm::vec2 scale = glm::vec2(1.0f, 1.0f);
+
+            glm::vec3 color(noiseVal, noiseVal, noiseVal);
+            //glm::vec2 texCoords(((float)rand() / (RAND_MAX)) * 10.0f, ((float)rand() / (RAND_MAX)) * 10.0f);
+
+            //temp = GameObject(translation, 0.0f, glm::vec2(1.0f, 1.0f), ResourceManager::GetTexture("block"), color, glm::vec2(0.0f, 0.0f));
+            //temp = GameObject(translation, rotation, scale, texCoords, glm::vec3(1.0f, 1.0f, 1.0f));
+
+            temp = GameObject(translation, rotation, scale, glm::vec2(15.0f, 0.0f), color);
+            StaticObjects.push_back(temp);
+        }
+    }
+    t.StopTimer();
+    std::cout << "Elapsed Time: " << t.ElapsedTimeMS() << "ms" << std::endl;
+
+    std::cout << "Min Value: " << min << "\t Max Value: " << max << std::endl;
+
+    /*
+    //int numObjects = 128;
+    for (int y = -numObjects; y < numObjects; ++y)
+    {
+        for (int x = -numObjects; x < numObjects; ++x)
+        {
+            glm::vec2 translation;
+            translation.x = (float)x + offset;
+            translation.y = (float)y + offset;
+
+            float rotation = 0.0f;
+            glm::vec2 scale = glm::vec2(1.0f, 1.0f);
+
+            glm::vec3 color(((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)), ((float)rand() / (RAND_MAX)));
+            glm::vec2 texCoords(((float)rand() / (RAND_MAX)) * 10.0f, ((float)rand() / (RAND_MAX)) * 10.0f);
+
+            //temp = GameObject(translation, 0.0f, glm::vec2(1.0f, 1.0f), ResourceManager::GetTexture("block"), color, glm::vec2(0.0f, 0.0f));
+            temp = GameObject(translation, rotation, scale, texCoords, glm::vec3(1.0f, 1.0f, 1.0f));
+            StaticObjects.push_back(temp);
+        }
+    }
+    */
+    std::cout << "Overworld Generation Done - " << StaticObjects.size() << " Objects Generated" << std::endl;
+}
+
+void Game::LoadOverworld()
+{
+
 }
