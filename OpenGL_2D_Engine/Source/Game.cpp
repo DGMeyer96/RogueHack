@@ -219,7 +219,9 @@ void Game::ProcessInput(float deltaTime)
     {
         this->KeysProcessed[GLFW_KEY_LEFT_BRACKET] = true;
 
-        if (CameraZoom == 0.25f)
+        if (CameraZoom == 0.1f)
+            CameraZoom = 0.25f;
+        else if (CameraZoom == 0.25f)
             CameraZoom = 1.0f;
         else if (CameraZoom == 1.0f)
             CameraZoom = 2.0f;
@@ -236,8 +238,10 @@ void Game::ProcessInput(float deltaTime)
 
         if (CameraZoom == 2.0f)
             CameraZoom = 1.0f;
-        else if(CameraZoom == 1.0f)
+        else if (CameraZoom == 1.0f)
             CameraZoom = 0.25f;
+        else if (CameraZoom == 0.25f)
+            CameraZoom = 0.1f;
 
         std::cout << "ZOOM OUT - " << CameraZoom << std::endl;
         GameEngine->UpdateCameraZoom(CameraZoom);
@@ -317,7 +321,7 @@ void Game::NewGame()
     int smallOverworld = 32;
     int mediumOverworld = 64;
     int largeOverworld = 128;
-    GenerateOverworld(smallOverworld);
+    GenerateOverworld(largeOverworld);
 
     std::cout << "STATIC UPDATE" << std::endl;
     GameEngine->UpdateStaticObjectPool(StaticObjects);
