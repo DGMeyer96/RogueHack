@@ -294,12 +294,11 @@ void Game::MainMenu()
     //GameEngine->UpdateUIObjectPool(UIObjects);
     //GameEngine->AddUIObject(background);
 
-
     Text text("ROGUE HACK!", glm::vec2(Width * -0.08f, Height * 0.45f));
     GameEngine->AddTextObject(text);
 
-    text = Text("Press ENTER to start", glm::vec2(Width * -0.14f, 0.0f));
-    GameEngine->AddTextObject(text);
+    Text startText = Text("Press ENTER to start", glm::vec2(Width * -0.14f, 0.0f));
+    GameEngine->AddTextObject(startText);
 }
 
 void Game::PauseGame()
@@ -321,7 +320,7 @@ void Game::NewGame()
     int smallOverworld = 32;
     int mediumOverworld = 64;
     int largeOverworld = 128;
-    GenerateOverworld(largeOverworld);
+    GenerateOverworld(smallOverworld);
 
     std::cout << "STATIC UPDATE" << std::endl;
     GameEngine->UpdateStaticObjectPool(StaticObjects);
@@ -458,13 +457,41 @@ void Game::GameUI()
     ui = GameObject(position, rotation, scale, glm::vec2(1.0f, 1.0f), Color::white());
     UIObjects.push_back(ui);
 
+    /* TOP UI ELEMENT */
+    // Top Border
+    position = glm::vec2(0.0f, Height * 0.475f);
+    scale = glm::vec2(20.35f, 1.0f);
+    ui = GameObject(position, rotation, scale, glm::vec2(1.0f, 0.0f), Color::white());
+    UIObjects.push_back(ui);
+    // Bottom Border
+    position = glm::vec2(0.0f, Height * 0.4f);
+    ui = GameObject(position, rotation, scale, glm::vec2(1.0f, 2.0f), Color::white());
+    UIObjects.push_back(ui);
+    // Filler
+    position = glm::vec2(0.0f, Height * 0.45f);
+    scale = glm::vec2(20.35f, 1.0f);
+    ui = GameObject(position, rotation, scale, glm::vec2(1.0f, 1.0f), Color::white());
+    UIObjects.push_back(ui);
+
     // Update UI object pool
     GameEngine->UpdateUIObjectPool(UIObjects);
 
     /* Add temp title message in message box */
-    position = glm::vec2(Width * -0.12f, Height * -0.375f);
+    position = glm::vec2(Width * -0.12f, Height * 0.46f);
     Text titleText = Text("ROGUE HACK", position, 1.5f, Color::white());
     GameEngine->AddTextObject(titleText);
+
+    position = glm::vec2(Width * -0.1f, Height * -0.375f);
+    Text dialogueText = Text("DIALOGUE BOX", position, 1.0f, Color::white());
+    GameEngine->AddTextObject(dialogueText);
+
+    position = glm::vec2(Width * 0.33f, Height * 0.4f);
+    Text rightText = Text("CONTROLS", position, 1.0f, Color::white());
+    GameEngine->AddTextObject(rightText);
+
+    position = glm::vec2(Width * -0.46f, Height * 0.4f);
+    Text leftText = Text("INVENTORY", position, 1.0f, Color::white());
+    GameEngine->AddTextObject(leftText);
 }
 
 void Game::GenerateOverworld(int size)
